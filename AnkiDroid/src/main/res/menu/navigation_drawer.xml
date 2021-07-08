@@ -26,6 +26,10 @@
             android:icon="@drawable/ic_settings_black"
             android:title="@string/settings"/>
         <item
+            android:id="@+id/nav_addons"
+            android:icon="@drawable/ic_baseline_extension_24"
+            android:title="@string/addons"/>
+        <item
             android:id="@+id/nav_help"
             android:icon="@drawable/ic_help_black"
             android:title="@string/help"/>

@@ -79,6 +79,8 @@ public abstract class NavigationDrawerActivity extends AnkiActivity implements N
     private static final String NIGHT_MODE_PREFERENCE = "invertedColors";
     public static final String FULL_SCREEN_NAVIGATION_DRAWER = "gestureFullScreenNavigationDrawer";
 
+    public static final int REQUEST_ADDONS = 103;
+
     /**
      * runnable that will be executed after the drawer has been closed.
      */
@@ -390,6 +392,10 @@ public abstract class NavigationDrawerActivity extends AnkiActivity implements N
             } else if (itemId == R.id.nav_night_mode) {
                 Timber.i("Toggling Night Mode");
                 mNightModeSwitch.performClick();
+            } else if (itemId == R.id.nav_addons) {
+                Timber.i("Navigating to addons");
+                Intent intent = new Intent(NavigationDrawerActivity.this, AddonBrowser.class);
+                startActivityForResultWithAnimation(intent, REQUEST_ADDONS, START);
             } else if (itemId == R.id.nav_settings) {
                 Timber.i("Navigating to settings");
                 // Remember the theme we started with so we can restart the Activity if it changes
