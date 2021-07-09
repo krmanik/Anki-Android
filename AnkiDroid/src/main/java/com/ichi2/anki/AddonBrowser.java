@@ -12,7 +12,6 @@ import com.ichi2.anki.jsaddons.DownloadAddonAsyncTaskListener;
 import com.ichi2.anki.jsaddons.NpmPackageDownloader;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
 
-import java8.util.concurrent.CompletableFuture;
 import timber.log.Timber;
 
 public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener, DownloadAddonAsyncTaskListener {
@@ -81,6 +80,7 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
                     return;
                 }
 
+                // get tarball and download npm package then extract and copy to addons folder
                 mNpmPackageDownloader.getTarball(npmAddonName)
                         .thenApply(url -> mNpmPackageDownloader.downloadAddonPackageFile(url, npmAddonName));
 
@@ -106,13 +106,13 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
 
     @Override
     public void addonShowProgressBar() {
-        runOnUiThread(() -> showProgressBar());
+        runOnUiThread(this::showProgressBar);
     }
 
 
     @Override
     public void addonHideProgressBar() {
-        runOnUiThread(() -> hideProgressBar());
+        runOnUiThread(this::hideProgressBar);
     }
 
 

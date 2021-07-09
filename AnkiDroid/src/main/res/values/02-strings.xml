@@ -388,5 +388,6 @@
     <string name="enter_npm_install_text">Enter name of Addon</string>
     <string name="addon_download_hint_text">npm i ankidroid-js-addon…</string>
     <string name="invalid_js_addon">Not a valid js addons package for AnkiDroid</string>
+    <string name="error_occur_downloadin_addon">Error occur in downloading addon</string>
     <string name="addon_download" comment="Button text for downloading addons">Install</string>
 </resources>

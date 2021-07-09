@@ -13,6 +13,7 @@ import org.rauschig.jarchivelib.ArchiverFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import java8.util.StringJoiner;
 import java8.util.concurrent.CompletableFuture;
@@ -43,29 +44,31 @@ public class NpmPackageDownloader {
                 }
             } catch (NullPointerException | IOException e) {
                 mTaskListener.addonHideProgressBar();
+                mTaskListener.showToast(mContext.getString(R.string.error_occur_downloadin_addon));
                 e.printStackTrace();
             }
 
             mTaskListener.addonHideProgressBar();
-            return "";
+            return null;
         });
     }
 
     /**
-     * @param npmAddonName addon name, e.g ankidroid-js-addon-progress-bar
      * @param tarballUrl   tarball url of addon.tgz package file
      */
-    public CompletableFuture<Void> downloadAddonPackageFile(String tarballUrl, String npmAddonName) {
-        return CompletableFuture.runAsync(() -> {
+    public CompletableFuture<String> downloadAddonPackageFile(String tarballUrl, String addonName) {
+        return CompletableFuture.supplyAsync(() -> {
             if (tarballUrl.isEmpty()) {
                 mTaskListener.addonHideProgressBar();
                 mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
-                return;
+                return null;
             }
 
             String downloadFilePath = downloadFileToSdCardMethod(tarballUrl, mContext, "addons", "GET");
             Timber.d("download path %s", downloadFilePath);
-            extractAndCopyAddonTgz(downloadFilePath, npmAddonName);
+
+            extractAndCopyAddonTgz(downloadFilePath, addonName);
+            return downloadFilePath;
         });
     }
 
