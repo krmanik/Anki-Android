@@ -50,13 +50,13 @@ public class NpmPackageDownloader {
 
             } catch (JsonParseException | JsonMappingException | MalformedURLException e) {
                 mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
-                Timber.e(e.getLocalizedMessage());
+                Timber.d(e.getLocalizedMessage());
             } catch (UnknownHostException e) {
                 mTaskListener.showToast(mContext.getString(R.string.network_no_connection));
-                Timber.e(e.getLocalizedMessage());
+                Timber.d(e.getLocalizedMessage());
             } catch (NullPointerException | IOException e) {
                 mTaskListener.showToast(mContext.getString(R.string.error_occur_downloading_addon));
-                Timber.e(e.getLocalizedMessage());
+                Timber.d(e.getLocalizedMessage());
             }
 
             mTaskListener.addonHideProgressBar();
@@ -88,8 +88,8 @@ public class NpmPackageDownloader {
      */
     public void extractAndCopyAddonTgz(String tarballPath, String npmAddonName) {
         if (tarballPath == null) {
-            mTaskListener.addonHideProgressBar();
-            mTaskListener.showToast(mContext.getString(R.string.failed_to_extract_addon_package));
+            //mTaskListener.addonHideProgressBar();
+            //mTaskListener.showToast(mContext.getString(R.string.failed_to_extract_addon_package));
             return;
         }
 
@@ -114,13 +114,13 @@ public class NpmPackageDownloader {
             Archiver archiver = ArchiverFactory.createArchiver(tarballFile);
             archiver.extract(tarballFile, addonsDir);
             Timber.d("js addon .tgz extracted");
-            mTaskListener.showToast(mContext.getString(R.string.addon_installed));
-            mTaskListener.addonHideProgressBar();
         } catch (IOException e) {
             Timber.e(e.getLocalizedMessage());
         } finally {
             if (tarballFile.exists()) {
                 tarballFile.delete();
+                mTaskListener.showToast(mContext.getString(R.string.addon_installed));
+                mTaskListener.addonHideProgressBar();
             }
         }
     }
