@@ -8,14 +8,16 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ichi2.anki.jsaddons.DownloadAddonAsyncTask;
 import com.ichi2.anki.jsaddons.DownloadAddonAsyncTaskListener;
+import com.ichi2.anki.jsaddons.NpmPackageDownloader;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
 
+import java8.util.concurrent.CompletableFuture;
 import timber.log.Timber;
 
 public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener, DownloadAddonAsyncTaskListener {
     private String npmAddonName;
+    private NpmPackageDownloader mNpmPackageDownloader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,7 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
 
         hideProgressBar();
 
+        mNpmPackageDownloader = new NpmPackageDownloader(this);
     }
 
 
@@ -78,7 +81,8 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
                     return;
                 }
 
-                new DownloadAddonAsyncTask(this).execute(npmAddonName);
+                mNpmPackageDownloader.getTarball(npmAddonName)
+                        .thenApply(url -> mNpmPackageDownloader.downloadAddonPackageFile(url, npmAddonName));
 
                 mDownloadDialog.dismiss();
             });
@@ -102,13 +106,18 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
 
     @Override
     public void addonShowProgressBar() {
-        showProgressBar();
+        runOnUiThread(() -> showProgressBar());
     }
 
 
     @Override
     public void addonHideProgressBar() {
-        hideProgressBar();
+        runOnUiThread(() -> hideProgressBar());
     }
 
+
+    @Override
+    public void showToast(String msg) {
+        runOnUiThread(() -> UIUtils.showThemedToast(getApplicationContext(), msg, false));
+    }
 }
