@@ -22,8 +22,6 @@ import timber.log.Timber;
 
 public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener, DownloadAddonAsyncTaskListener {
     private String npmAddonName;
-    private NpmPackageDownloader mNpmPackageDownloader;
-    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +41,6 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
         showBackIcon();
 
         hideProgressBar();
-
-        mContext = this;
     }
 
 
@@ -127,8 +123,4 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
         runOnUiThread(() -> UIUtils.showThemedToast(getApplicationContext(), msg, false));
     }
 
-
-    public Context getContext() {
-        return mContext;
-    }
 }

@@ -59,13 +59,13 @@ public class NpmPackageDownloader extends DownloadAddonBackgroundTask {
 
         } catch (JsonParseException | JsonMappingException | MalformedURLException e) {
             mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
-            Timber.d(e.getLocalizedMessage());
+            Timber.w(e.getLocalizedMessage());
         } catch (UnknownHostException e) {
             mTaskListener.showToast(mContext.getString(R.string.network_no_connection));
-            Timber.d(e.getLocalizedMessage());
+            Timber.w(e.getLocalizedMessage());
         } catch (NullPointerException | IOException e) {
             mTaskListener.showToast(mContext.getString(R.string.error_occur_downloading_addon));
-            Timber.d(e.getLocalizedMessage());
+            Timber.w(e.getLocalizedMessage());
         }
     }
 
@@ -82,8 +82,8 @@ public class NpmPackageDownloader extends DownloadAddonBackgroundTask {
      */
     public void extractAndCopyAddonTgz(String tarballPath, String npmAddonName) {
         if (tarballPath == null) {
-            //mTaskListener.addonHideProgressBar();
-            //mTaskListener.showToast(mContext.getString(R.string.failed_to_extract_addon_package));
+            mTaskListener.addonHideProgressBar();
+            mTaskListener.showToast(mContext.getString(R.string.failed_to_extract_addon_package));
             return;
         }
 
