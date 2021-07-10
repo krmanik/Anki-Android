@@ -12,7 +12,9 @@ import android.widget.EditText;
 import com.ichi2.anki.jsaddons.DownloadAddonAsyncTaskListener;
 import com.ichi2.anki.jsaddons.NpmPackageDownloader;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
+import com.ichi2.async.Connection;
 import com.ichi2.async.ProgressSenderAndCancelListener;
+import com.ichi2.async.TaskListener;
 import com.ichi2.async.TaskManager;
 import com.ichi2.libanki.Collection;
 
@@ -83,8 +85,24 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
                     return;
                 }
 
+
+                Collection col = CollectionHelper.getInstance().getCol(AnkiDroidApp.getInstance().getApplicationContext());
+
+                ProgressSenderAndCancelListener<Void> collectionTask = new ProgressSenderAndCancelListener<Void>() {
+                    @Override
+                    public boolean isCancelled() {
+                        return false;
+                    }
+
+
+                    @Override
+                    public void doProgress(@Nullable @org.jetbrains.annotations.Nullable Void value) {
+
+                    }
+                };
+
                 // get tarball and download npm package then extract and copy to addons folder
-                new NpmPackageDownloader(this, this, npmAddonName).execute();
+                TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(this, npmAddonName));
 
                 mDownloadDialog.dismiss();
             });
