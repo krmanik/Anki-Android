@@ -1,5 +1,6 @@
 package com.ichi2.anki.jsaddons;
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -19,66 +20,59 @@ import java.net.URL;
 import java.net.UnknownHostException;
 
 import java8.util.StringJoiner;
-import java8.util.concurrent.CompletableFuture;
 import timber.log.Timber;
 
 import static com.ichi2.anki.web.HttpFetcher.downloadFileToSdCardMethod;
 
-public class NpmPackageDownloader {
+public class NpmPackageDownloader extends DownloadAddonBackgroundTask {
     private Context mContext;
     private DownloadAddonAsyncTaskListener mTaskListener;
+    private String addonName;
 
-    public NpmPackageDownloader(Context context) {
+    public NpmPackageDownloader(Activity activity, Context context, String addonName) {
+        super(activity);
         this.mContext = context;
+        this.addonName = addonName;
         mTaskListener = (DownloadAddonAsyncTaskListener) context;
     }
 
-    public CompletableFuture<String> getTarball(String addonName) {
-        return CompletableFuture.supplyAsync(() -> {
-            mTaskListener.addonShowProgressBar();
-            try {
-                ObjectMapper mapper = new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-                AddonInfo mAddonInfo = mapper.readValue(new URL(mContext.getString(R.string.npmjs_registry, addonName)), AddonInfo.class);
+    @Override
+    public void doInBackground() {
+        mTaskListener.addonShowProgressBar();
+        try {
+            ObjectMapper mapper = new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-                if (AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
-                    return mAddonInfo.getDist().get("tarball");
-                } else {
-                    mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
-                }
+            AddonInfo mAddonInfo = mapper.readValue(new URL(mContext.getString(R.string.npmjs_registry, addonName)), AddonInfo.class);
 
-            } catch (JsonParseException | JsonMappingException | MalformedURLException e) {
+            if (AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
+                String tarballUrl = mAddonInfo.getDist().get("tarball");
+
+                String downloadFilePath = downloadFileToSdCardMethod(tarballUrl, mContext, "addons", "GET");
+                Timber.d("download path %s", downloadFilePath);
+                extractAndCopyAddonTgz(downloadFilePath, addonName);
+
+            } else {
                 mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
-                Timber.d(e.getLocalizedMessage());
-            } catch (UnknownHostException e) {
-                mTaskListener.showToast(mContext.getString(R.string.network_no_connection));
-                Timber.d(e.getLocalizedMessage());
-            } catch (NullPointerException | IOException e) {
-                mTaskListener.showToast(mContext.getString(R.string.error_occur_downloading_addon));
-                Timber.d(e.getLocalizedMessage());
             }
 
-            mTaskListener.addonHideProgressBar();
-            return null;
-        });
+        } catch (JsonParseException | JsonMappingException | MalformedURLException e) {
+            mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
+            Timber.d(e.getLocalizedMessage());
+        } catch (UnknownHostException e) {
+            mTaskListener.showToast(mContext.getString(R.string.network_no_connection));
+            Timber.d(e.getLocalizedMessage());
+        } catch (NullPointerException | IOException e) {
+            mTaskListener.showToast(mContext.getString(R.string.error_occur_downloading_addon));
+            Timber.d(e.getLocalizedMessage());
+        }
     }
 
-    /**
-     * @param tarballUrl   tarball url of addon.tgz package file
-     */
-    public CompletableFuture<String> downloadAddonPackageFile(String tarballUrl, String addonName) {
-        return CompletableFuture.supplyAsync(() -> {
-            if (tarballUrl == null) {
-                return null;
-            }
 
-            String downloadFilePath = downloadFileToSdCardMethod(tarballUrl, mContext, "addons", "GET");
-            Timber.d("download path %s", downloadFilePath);
-
-            extractAndCopyAddonTgz(downloadFilePath, addonName);
-            return downloadFilePath;
-        });
+    @Override
+    public void onPostExecute() {
+        mTaskListener.addonHideProgressBar();
     }
 
     /**
@@ -120,7 +114,6 @@ public class NpmPackageDownloader {
             if (tarballFile.exists()) {
                 tarballFile.delete();
                 mTaskListener.showToast(mContext.getString(R.string.addon_installed));
-                mTaskListener.addonHideProgressBar();
             }
         }
     }

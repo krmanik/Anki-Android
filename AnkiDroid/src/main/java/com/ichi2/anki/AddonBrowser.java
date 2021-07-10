@@ -12,7 +12,12 @@ import android.widget.EditText;
 import com.ichi2.anki.jsaddons.DownloadAddonAsyncTaskListener;
 import com.ichi2.anki.jsaddons.NpmPackageDownloader;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
+import com.ichi2.async.ProgressSenderAndCancelListener;
+import com.ichi2.async.TaskManager;
+import com.ichi2.libanki.Collection;
 
+import BackendProto.Backend;
+import androidx.annotation.Nullable;
 import timber.log.Timber;
 
 public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener, DownloadAddonAsyncTaskListener {
@@ -40,7 +45,6 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
         hideProgressBar();
 
         mContext = this;
-        mNpmPackageDownloader = new NpmPackageDownloader(this);
     }
 
 
@@ -84,8 +88,7 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
                 }
 
                 // get tarball and download npm package then extract and copy to addons folder
-                mNpmPackageDownloader.getTarball(npmAddonName)
-                        .thenApply(url -> mNpmPackageDownloader.downloadAddonPackageFile(url, npmAddonName));
+                new NpmPackageDownloader(this, this, npmAddonName).execute();
 
                 mDownloadDialog.dismiss();
             });
