@@ -1,3 +1,20 @@
+/****************************************************************************************
+ * Copyright (c) 2021 Mani <infinyte01@gmail.com>                                       *
+ *                                                                                      *
+ *                                                                                      *
+ * This program is free software; you can redistribute it and/or modify it under        *
+ * the terms of the GNU General Public License as published by the Free Software        *
+ * Foundation; either version 3 of the License, or (at your option) any later           *
+ * version.                                                                             *
+ *                                                                                      *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY      *
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
+ * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
+ *                                                                                      *
+ * You should have received a copy of the GNU General Public License along with         *
+ * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
+ ****************************************************************************************/
+
 package com.ichi2.anki;
 
 import android.app.Dialog;
@@ -8,7 +25,6 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ichi2.anki.jsaddons.AddonInfo;
 import com.ichi2.anki.jsaddons.DownloadAddonListener;
 import com.ichi2.anki.jsaddons.NpmPackageDownloader;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
@@ -17,7 +33,7 @@ import com.ichi2.async.TaskManager;
 import timber.log.Timber;
 
 public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener {
-    private String npmAddonName;
+    private String mNpmAddonName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,22 +81,22 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
             Button downloadButton = mDownloadDialog.findViewById(R.id.addon_download_button);
 
             downloadButton.setOnClickListener(v -> {
-                npmAddonName = downloadEditText.getText().toString();
+                mNpmAddonName = downloadEditText.getText().toString();
 
                 // if string is:  npm i ankidroid-js-addon-progress-bar
-                if (npmAddonName.startsWith("npm i")) {
-                    npmAddonName = npmAddonName.substring("npm i".length());
+                if (mNpmAddonName.startsWith("npm i")) {
+                    mNpmAddonName = mNpmAddonName.substring("npm i".length());
                 }
 
                 // if containing space
-                npmAddonName = npmAddonName.trim();
-                npmAddonName = npmAddonName.replaceAll("\u00A0", "");
-                if (npmAddonName.isEmpty()) {
+                mNpmAddonName = mNpmAddonName.trim();
+                mNpmAddonName = mNpmAddonName.replaceAll("\u00A0", "");
+                if (mNpmAddonName.isEmpty()) {
                     return;
                 }
 
                 // get tarball and download npm package then extract and copy to addons folder
-                TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(this, npmAddonName), new DownloadAddonListener(this));
+                TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(this, mNpmAddonName), new DownloadAddonListener(this));
 
                 mDownloadDialog.dismiss();
             });
