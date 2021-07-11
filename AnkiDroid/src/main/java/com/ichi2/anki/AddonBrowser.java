@@ -1,7 +1,6 @@
 package com.ichi2.anki;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,20 +8,15 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ichi2.anki.jsaddons.DownloadAddonAsyncTaskListener;
+import com.ichi2.anki.jsaddons.AddonInfo;
+import com.ichi2.anki.jsaddons.DownloadAddonListener;
 import com.ichi2.anki.jsaddons.NpmPackageDownloader;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
-import com.ichi2.async.Connection;
-import com.ichi2.async.ProgressSenderAndCancelListener;
-import com.ichi2.async.TaskListener;
 import com.ichi2.async.TaskManager;
-import com.ichi2.libanki.Collection;
 
-import BackendProto.Backend;
-import androidx.annotation.Nullable;
 import timber.log.Timber;
 
-public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener, DownloadAddonAsyncTaskListener {
+public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener {
     private String npmAddonName;
 
     @Override
@@ -54,7 +48,7 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItem installAddon, getMoreAddons, reviewerAddons;
+        MenuItem installAddon, getMoreAddons;
 
         getMenuInflater().inflate(R.menu.addon_browser, menu);
         installAddon = menu.findItem(R.id.action_install_addon);
@@ -85,24 +79,8 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
                     return;
                 }
 
-
-                Collection col = CollectionHelper.getInstance().getCol(AnkiDroidApp.getInstance().getApplicationContext());
-
-                ProgressSenderAndCancelListener<Void> collectionTask = new ProgressSenderAndCancelListener<Void>() {
-                    @Override
-                    public boolean isCancelled() {
-                        return false;
-                    }
-
-
-                    @Override
-                    public void doProgress(@Nullable @org.jetbrains.annotations.Nullable Void value) {
-
-                    }
-                };
-
                 // get tarball and download npm package then extract and copy to addons folder
-                TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(this, npmAddonName));
+                TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(this, npmAddonName), new DownloadAddonListener(this));
 
                 mDownloadDialog.dismiss();
             });
@@ -119,26 +97,7 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public void listAddonsFromDir(String addonType) {
+    public void listAddonsFromDir() {
         Timber.d("List addon from directory.");
     }
-
-    @Override
-    public void addonShowProgressBar() {
-        runOnUiThread(this::showProgressBar);
-    }
-
-
-    @Override
-    public void addonHideProgressBar() {
-        runOnUiThread(this::hideProgressBar);
-    }
-
-
-    @Override
-    public void showToast(String msg) {
-        runOnUiThread(() -> UIUtils.showThemedToast(getApplicationContext(), msg, false));
-    }
-
 }

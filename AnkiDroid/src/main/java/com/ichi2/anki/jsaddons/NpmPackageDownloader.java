@@ -11,7 +11,6 @@ import com.ichi2.anki.R;
 import com.ichi2.async.ProgressSenderAndCancelListener;
 import com.ichi2.async.TaskDelegate;
 import com.ichi2.libanki.Collection;
-import com.ichi2.utils.Computation;
 
 import org.jetbrains.annotations.NotNull;
 import org.rauschig.jarchivelib.Archiver;
@@ -30,21 +29,20 @@ import static com.ichi2.anki.web.HttpFetcher.downloadFileToSdCardMethod;
 
 public class NpmPackageDownloader {
 
-    public static class DownloadAddon extends TaskDelegate<Void, Computation<?>> {
-        private Context mContext;
-        private DownloadAddonAsyncTaskListener mTaskListener;
-        private String addonName;
+    public static class DownloadAddon extends TaskDelegate<Void, String> {
+        private final Context mContext;
+        private final String addonName;
 
 
         public DownloadAddon(Context context, String addonName) {
             this.mContext = context;
             this.addonName = addonName;
-            mTaskListener = (DownloadAddonAsyncTaskListener) context;
         }
 
-        protected Computation<?> task(@NotNull Collection col, @NotNull ProgressSenderAndCancelListener<Void> collectionTask) {
-            mTaskListener.addonShowProgressBar();
+
+        protected String task(@NotNull Collection col, @NotNull ProgressSenderAndCancelListener<Void> psacl) {
             try {
+
                 // mapping for json in http://registry.npmjs.org/ankidroid-js-addon-.../latest
                 ObjectMapper mapper = new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -52,44 +50,41 @@ public class NpmPackageDownloader {
                 AddonInfo mAddonInfo = mapper.readValue(new URL(mContext.getString(R.string.npmjs_registry, addonName)), AddonInfo.class);
 
                 // check if fields like ankidroidJsApi, addonType exists or not
-                if (AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
-                    String tarballUrl = mAddonInfo.getDist().get("tarball");
-
-                    // download the .tgz file in cache dir of AnkiDroid
-                    String downloadFilePath = downloadFileToSdCardMethod(tarballUrl, mContext, "addons", "GET");
-                    Timber.d("download path %s", downloadFilePath);
-
-                    // extract the .tgz file to AnkiDroid/addons dir
-                    extractAndCopyAddonTgz(downloadFilePath, addonName);
-
-                } else {
-                    mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
+                if (!AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
+                    return mContext.getString(R.string.invalid_js_addon);
                 }
 
+                String tarballUrl = mAddonInfo.getDist().get("tarball");
+                String addonType = mAddonInfo.getAddonType();
+
+                // download the .tgz file in cache dir of AnkiDroid
+                String downloadFilePath = downloadFileToSdCardMethod(tarballUrl, mContext, "addons", "GET");
+                Timber.d("download path %s", downloadFilePath);
+
+                // extract the .tgz file to AnkiDroid/addons dir
+                boolean extracted = extractAndCopyAddonTgz(downloadFilePath, addonName);
+                if (!extracted) {
+                    return mContext.getString(R.string.failed_to_extract_addon_package);
+                }
+                // addonType sent to list the addons in recycler view
+                return mContext.getString(R.string.addon_installed);
+
             } catch (JsonParseException | JsonMappingException | MalformedURLException e) {
-                mTaskListener.showToast(mContext.getString(R.string.invalid_js_addon));
                 Timber.w(e.getLocalizedMessage());
+                return mContext.getString(R.string.invalid_js_addon);
             } catch (UnknownHostException e) {
-                mTaskListener.showToast(mContext.getString(R.string.network_no_connection));
                 Timber.w(e.getLocalizedMessage());
+                return mContext.getString(R.string.network_no_connection);
             } catch (NullPointerException | IOException e) {
-                mTaskListener.showToast(mContext.getString(R.string.error_occur_downloading_addon));
                 Timber.w(e.getLocalizedMessage());
+                return mContext.getString(R.string.error_occur_downloading_addon);
             }
-            return null;
         }
 
 
-        /**
-         * @param tarballPath  path to downloaded js-addon.tgz file
-         * @param npmAddonName addon name, e.g ankidroid-js-addon-progress-bar
-         *                     extract downloaded .tgz files and copy to AnkiDroid/addons/ folder
-         */
-        public void extractAndCopyAddonTgz(String tarballPath, String npmAddonName) {
+        public boolean extractAndCopyAddonTgz(String tarballPath, String npmAddonName) {
             if (tarballPath == null) {
-                mTaskListener.addonHideProgressBar();
-                mTaskListener.showToast(mContext.getString(R.string.failed_to_extract_addon_package));
-                return;
+                return false;
             }
 
             String currentAnkiDroidDirectory = CollectionHelper.getCurrentAnkiDroidDirectory(mContext);
@@ -105,7 +100,7 @@ public class NpmPackageDownloader {
             File tarballFile = new File(tarballPath);
 
             if (!tarballFile.exists()) {
-                return;
+                return false;
             }
 
             // extracting using library https://github.com/thrau/jarchivelib
@@ -115,13 +110,13 @@ public class NpmPackageDownloader {
                 Timber.d("js addon .tgz extracted");
             } catch (IOException e) {
                 Timber.e(e.getLocalizedMessage());
+                return false;
             } finally {
                 if (tarballFile.exists()) {
                     tarballFile.delete();
-                    mTaskListener.addonHideProgressBar();
-                    mTaskListener.showToast(mContext.getString(R.string.addon_installed));
                 }
             }
+            return true;
         }
     }
 }
