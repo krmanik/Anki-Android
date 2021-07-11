@@ -376,6 +376,7 @@
     <string name="password_empty">Password is required</string>
 
     <string name="back_pressed_once">Press back again to exit</string>
+    <string name="back_pressed_once_reviewer">Press back again to return</string>
 
     <!-- for js addons, npnjs registry url to download addon package file -->
     <string name="npmjs_registry" translatable="false">https://registry.npmjs.org/%s/latest</string>
