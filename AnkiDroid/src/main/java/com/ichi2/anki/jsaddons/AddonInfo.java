@@ -5,10 +5,10 @@ import java.util.Map;
 public class AddonInfo {
     // Update if api get updated
     // TODO Extract to resources from other classes
-    private static String ANKIDROID_JS_API = "0.0.1";
-    private static String ANKIDROID_JS_ADDON_KEYWORDS = "ankidroid-js-addon";
-    private static String REVIEWER_ADDON = "reviewer";
-    private static String NOTE_EDITOR_ADDON = "note-editor";
+    public static final String ANKIDROID_JS_API = "0.0.1";
+    public static final String ANKIDROID_JS_ADDON_KEYWORDS = "ankidroid-js-addon";
+    public static final String REVIEWER_ADDON = "reviewer";
+    public static final String NOTE_EDITOR_ADDON = "note-editor";
 
     private String name;
     private String version;
@@ -107,11 +107,7 @@ public class AddonInfo {
         }
 
         // addon package.json should have js_api_version, ankidroid-js-addon keywords and addon type
-        if (addonInfo.getAnkidroidJsApi().equals(ANKIDROID_JS_API) && jsAddonKeywordsPresent
-                && (addonInfo.getAddonType().equals(REVIEWER_ADDON) || addonInfo.getAddonType().equals(NOTE_EDITOR_ADDON))) {
-            return true;
-        }
-
-        return false;
+        return addonInfo.getAnkidroidJsApi().equals(ANKIDROID_JS_API) && jsAddonKeywordsPresent
+                && (addonInfo.getAddonType().equals(REVIEWER_ADDON) || addonInfo.getAddonType().equals(NOTE_EDITOR_ADDON));
     }
 }
