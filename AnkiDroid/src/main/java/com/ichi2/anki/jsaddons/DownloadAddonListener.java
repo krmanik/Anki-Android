@@ -46,12 +46,7 @@ public class DownloadAddonListener extends TaskListener<Void, String> {
     @Override
     public void onPostExecute(String s) {
         UIUtils.showThemedToast(mContext, s, false);
-        try {
-            mAddonBrowser.listAddonsFromDir();
-        } catch (IOException e) {
-            Timber.w(e.getLocalizedMessage());
-        }
+        mAddonBrowser.listAddonsFromDir();
         mAddonBrowser.hideProgressBar();
     }
-
 }

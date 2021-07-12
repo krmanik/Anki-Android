@@ -25,7 +25,9 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ichi2.anki.jsaddons.AddonInfo;
 import com.ichi2.anki.jsaddons.AddonsAdapter;
@@ -36,11 +38,11 @@ import com.ichi2.async.TaskManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import timber.log.Timber;
@@ -48,6 +50,7 @@ import timber.log.Timber;
 public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener {
     private String mNpmAddonName;
     private RecyclerView mAddonsListRecyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,13 +73,7 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
         mAddonsListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        try {
-            listAddonsFromDir();
-        } catch (IOException e) {
-            Timber.w(e.getLocalizedMessage());
-            UIUtils.showThemedToast(this, getString(R.string.error_listing_addons), false);
-            hideProgressBar();
-        }
+        listAddonsFromDir();
     }
 
 
@@ -137,14 +134,14 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
     }
 
 
-   /*
-   list addons with valid package.json, i.e contains
-   ankidroid_js_api = 0.0.1
-   keywords='ankidroid-js-addon'
-   and non empty string.
-   Then that addon will available for enable/disable
-   */
-    public void listAddonsFromDir() throws IOException {
+    /*
+    list addons with valid package.json, i.e contains
+    ankidroid_js_api = 0.0.1
+    keywords='ankidroid-js-addon'
+    and non empty string.
+    Then that addon will available for enable/disable
+    */
+    public void listAddonsFromDir() {
         String currentAnkiDroidDirectory = CollectionHelper.getCurrentAnkiDroidDirectory(this);
         File addonsHomeDir = new File(currentAnkiDroidDirectory, "addons");
         List<AddonInfo> addonsList = new ArrayList<>();
@@ -155,23 +152,41 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
         }
 
         if (success) {
-            File[] files = addonsHomeDir.listFiles();
-            for (File file : files) {
-                Timber.d("Addons: %s", file.getName());
+            try {
+                File[] files = addonsHomeDir.listFiles();
 
-                // Read package.json from
-                // AnkiDroid/addons/ankidroid-addon-../package/package.json
-                ObjectMapper mapper = new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                for (File file : files) {
+                    Timber.d("Addons: %s", file.getName());
 
-                AddonInfo mAddonInfo = mapper.readValue(new File(file, "package/package.json"), AddonInfo.class);
+                    // Read package.json from
+                    // AnkiDroid/addons/ankidroid-addon-../package/package.json
+                    ObjectMapper mapper = new ObjectMapper()
+                            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-                if (AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
-                    addonsList.add(mAddonInfo);
+                    AddonInfo mAddonInfo = mapper.readValue(new File(file, "package/package.json"), AddonInfo.class);
+
+                    if (AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
+                        addonsList.add(mAddonInfo);
+                    }
                 }
+                mAddonsListRecyclerView.setAdapter(new AddonsAdapter(addonsList));
+
+            } catch (JsonParseException | JsonMappingException | MalformedURLException e) {
+                Timber.w(e.getLocalizedMessage());
+                UIUtils.showThemedToast(this, getString(R.string.invalid_js_addon), false);
+            } catch (NullPointerException | IOException e) {
+                Timber.w(e.getLocalizedMessage());
+                UIUtils.showThemedToast(this, getString(R.string.invalid_js_addon), false);
             }
-            mAddonsListRecyclerView.setAdapter(new AddonsAdapter(addonsList));
         }
+
         hideProgressBar();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        listAddonsFromDir();
     }
 }
