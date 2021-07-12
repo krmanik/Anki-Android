@@ -18,8 +18,11 @@
 package com.ichi2.anki.jsaddons;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressLint("NonPublicNonStaticFieldName")
 public class AddonInfo {
@@ -29,8 +32,10 @@ public class AddonInfo {
     public static final String ANKIDROID_JS_ADDON_KEYWORDS = "ankidroid-js-addon";
     public static final String REVIEWER_ADDON = "reviewer";
     public static final String NOTE_EDITOR_ADDON = "note-editor";
+    public static final String JS_ADDON_KEY = "js_addon_key";
 
     private String name;
+    private String addonTitle;
     private String version;
     private String description;
     private String main;
@@ -45,6 +50,11 @@ public class AddonInfo {
 
     public String getName() {
         return name;
+    }
+
+
+    public String getAddonTitle() {
+        return addonTitle;
     }
 
 
@@ -107,13 +117,13 @@ public class AddonInfo {
         boolean jsAddonKeywordsPresent = false;
 
         // either fields not present in package.json or failed to parse the fields
-        if (addonInfo.getName() == null || addonInfo.getMain() == null || addonInfo.getAnkidroidJsApi() == null
+        if (addonInfo.getName() == null || addonInfo.getAddonTitle() == null || addonInfo.getMain() == null || addonInfo.getAnkidroidJsApi() == null
                 || addonInfo.getAddonType() == null || addonInfo.getHomepage() == null || addonInfo.getKeywords() == null) {
             return false;
         }
 
         // if fields are empty
-        if (addonInfo.getName().isEmpty() || addonInfo.getMain().isEmpty() || addonInfo.getAnkidroidJsApi().isEmpty()
+        if (addonInfo.getName().isEmpty() || addonInfo.getAddonTitle().isEmpty() || addonInfo.getMain().isEmpty() || addonInfo.getAnkidroidJsApi().isEmpty()
                 || addonInfo.getAddonType().isEmpty() || addonInfo.getHomepage().isEmpty()) {
             return false;
         }
@@ -129,5 +139,25 @@ public class AddonInfo {
         // addon package.json should have js_api_version, ankidroid-js-addon keywords and addon type
         return addonInfo.getAnkidroidJsApi().equals(ANKIDROID_JS_API) && jsAddonKeywordsPresent
                 && (addonInfo.getAddonType().equals(REVIEWER_ADDON) || addonInfo.getAddonType().equals(NOTE_EDITOR_ADDON));
+    }
+
+
+    /**
+     * @param jsAddonKey  REVIEWER_ADDON_KEY
+     * @param addonName addonName i.e addon directory in AnkiDroid/addons folder
+     * @param remove    true for removing from prefs
+     *                  <p>
+     *                  https://stackoverflow.com/questions/19949182/android-sharedpreferences-string-set-some-items-are-removed-after-app-restart/19949833
+     */
+    public static void updatePrefs(SharedPreferences preferences, String jsAddonKey, String addonName, boolean remove) {
+        Set<String> reviewerEnabledAddonSet = preferences.getStringSet(jsAddonKey, new HashSet<String>());
+        Set<String> newStrSet = new HashSet<String>(reviewerEnabledAddonSet);
+
+        if (remove) {
+            newStrSet.remove(addonName);
+        } else {
+            newStrSet.add(addonName);
+        }
+        preferences.edit().putStringSet(jsAddonKey, newStrSet).apply();
     }
 }

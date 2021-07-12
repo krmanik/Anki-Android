@@ -25,15 +25,29 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ichi2.anki.jsaddons.AddonInfo;
+import com.ichi2.anki.jsaddons.AddonsAdapter;
 import com.ichi2.anki.jsaddons.DownloadAddonListener;
 import com.ichi2.anki.jsaddons.NpmPackageDownloader;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
 import com.ichi2.async.TaskManager;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import timber.log.Timber;
 
 public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDownAdapter.SubtitleListener {
     private String mNpmAddonName;
+    private RecyclerView mAddonsListRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +61,22 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
         initNavigationDrawer(findViewById(android.R.id.content));
 
         // Add a home button to the actionbar
-        getSupportActionBar().setHomeButtonEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.js_addons));
         showBackIcon();
 
-        hideProgressBar();
+        mAddonsListRecyclerView = findViewById(R.id.addons);
+        mAddonsListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+
+        try {
+            listAddonsFromDir();
+        } catch (IOException e) {
+            Timber.w(e.getLocalizedMessage());
+            UIUtils.showThemedToast(this, getString(R.string.error_listing_addons), false);
+            hideProgressBar();
+        }
     }
 
 
@@ -109,11 +133,45 @@ public class AddonBrowser extends NavigationDrawerActivity implements DeckDropDo
             openUrl(Uri.parse(getResources().getString(R.string.ankidroid_js_addon_npm_search_url)));
             return true;
         });
-
         return super.onCreateOptionsMenu(menu);
     }
 
-    public void listAddonsFromDir() {
-        Timber.d("List addon from directory.");
+
+   /*
+   list addons with valid package.json, i.e contains
+   ankidroid_js_api = 0.0.1
+   keywords='ankidroid-js-addon'
+   and non empty string.
+   Then that addon will available for enable/disable
+   */
+    public void listAddonsFromDir() throws IOException {
+        String currentAnkiDroidDirectory = CollectionHelper.getCurrentAnkiDroidDirectory(this);
+        File addonsHomeDir = new File(currentAnkiDroidDirectory, "addons");
+        List<AddonInfo> addonsList = new ArrayList<>();
+
+        boolean success = true;
+        if (!addonsHomeDir.exists()) {
+            success = addonsHomeDir.mkdirs();
+        }
+
+        if (success) {
+            File[] files = addonsHomeDir.listFiles();
+            for (File file : files) {
+                Timber.d("Addons: %s", file.getName());
+
+                // Read package.json from
+                // AnkiDroid/addons/ankidroid-addon-../package/package.json
+                ObjectMapper mapper = new ObjectMapper()
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+                AddonInfo mAddonInfo = mapper.readValue(new File(file, "package/package.json"), AddonInfo.class);
+
+                if (AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
+                    addonsList.add(mAddonInfo);
+                }
+            }
+            mAddonsListRecyclerView.setAdapter(new AddonsAdapter(addonsList));
+        }
+        hideProgressBar();
     }
 }

@@ -23,6 +23,10 @@ import com.ichi2.anki.AddonBrowser;
 import com.ichi2.anki.UIUtils;
 import com.ichi2.async.TaskListener;
 
+import java.io.IOException;
+
+import timber.log.Timber;
+
 public class DownloadAddonListener extends TaskListener<Void, String> {
     private Context mContext;
     private AddonBrowser mAddonBrowser;
@@ -42,7 +46,11 @@ public class DownloadAddonListener extends TaskListener<Void, String> {
     @Override
     public void onPostExecute(String s) {
         UIUtils.showThemedToast(mContext, s, false);
-        mAddonBrowser.listAddonsFromDir();
+        try {
+            mAddonBrowser.listAddonsFromDir();
+        } catch (IOException e) {
+            Timber.w(e.getLocalizedMessage());
+        }
         mAddonBrowser.hideProgressBar();
     }
 
