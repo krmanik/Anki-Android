@@ -20,18 +20,20 @@ import static org.junit.Assert.assertEquals;
 @RunWith(AndroidJUnit4.class)
 public class NpmPackageDownloaderTest extends RobolectricTest {
     private final String inValidAddonName = "fs";
-    private final String validAddonName = "ankidroid-js-addon-progress-bar";
+    private final String validAddonPackageName = "ankidroid-js-addon-progress-bar";
+    private final String validAddonName = "Progress Bar";
 
 
     @Test
     @RunInBackground
     public void validAddonTest() throws ExecutionException, InterruptedException {
         final Context context = getTargetContext();
-        CollectionTask<Void, String> ct = TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(context, validAddonName));
+        CollectionTask<Void, String> ct = TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(context, validAddonPackageName));
 
         // this string is toast when addon successfully installed
-        // launchCollectionTask return, 'JavaScript Addon installed'
-        assertEquals(context.getString(R.string.addon_installed), ct.get());
+        // launchCollectionTask return, 'Progress Bar JavaScript addon installed'
+        // here addon title returned
+        assertEquals(context.getString(R.string.addon_installed, validAddonName), ct.get());
     }
 
 
@@ -42,7 +44,8 @@ public class NpmPackageDownloaderTest extends RobolectricTest {
         CollectionTask<Void, String> ct = TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(context, inValidAddonName));
 
         // this string is toast when not valid addon requested
-        // launchCollectionTask return, 'Not a valid js addons package for AnkiDroid'
-        assertEquals(context.getString(R.string.invalid_js_addon), ct.get());
+        // launchCollectionTask return, 'fs not a valid js addons package for AnkiDroid'
+        // here addon addon name i.e. npm package returned returned
+        assertEquals(context.getString(R.string.is_not_valid_js_addon, inValidAddonName), ct.get());
     }
 }

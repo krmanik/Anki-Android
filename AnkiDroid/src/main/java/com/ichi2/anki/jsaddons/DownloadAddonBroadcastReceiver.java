@@ -1,3 +1,20 @@
+/****************************************************************************************
+ * Copyright (c) 2021 Mani <infinyte01@gmail.com>                                       *
+ *                                                                                      *
+ *                                                                                      *
+ * This program is free software; you can redistribute it and/or modify it under        *
+ * the terms of the GNU General Public License as published by the Free Software        *
+ * Foundation; either version 3 of the License, or (at your option) any later           *
+ * version.                                                                             *
+ *                                                                                      *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY      *
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
+ * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
+ *                                                                                      *
+ * You should have received a copy of the GNU General Public License along with         *
+ * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
+ ****************************************************************************************/
+
 package com.ichi2.anki.jsaddons;
 
 import android.content.BroadcastReceiver;
@@ -31,16 +48,16 @@ public class DownloadAddonBroadcastReceiver extends BroadcastReceiver {
         CollectionTask<Void, String> ct = TaskManager.launchCollectionTask(new NpmPackageDownloader.DownloadAddon(context, addonName));
 
         try {
-            if (context.getString(R.string.addon_installed).equals(ct.get())) {
-                UIUtils.showThemedToast(context, context.getString(R.string.addon_installed), false);
+            if (ct.get().contains("addon installed")) {
+                UIUtils.showThemedToast(context, context.getString(R.string.addon_installed, addonName), false);
             } else {
-                UIUtils.showThemedToast(context, context.getString(R.string.invalid_js_addon), false);
+                UIUtils.showThemedToast(context, context.getString(R.string.is_not_valid_js_addon, addonName), false);
             }
         } catch (ExecutionException e) {
-            UIUtils.showThemedToast(context, context.getString(R.string.error_occur_downloading_addon), false);
+            UIUtils.showThemedToast(context, context.getString(R.string.error_occur_downloading_addon, addonName), false);
             Timber.w(e.getLocalizedMessage());
         } catch (InterruptedException e) {
-            UIUtils.showThemedToast(context, context.getString(R.string.error_occur_downloading_addon), false);
+            UIUtils.showThemedToast(context, context.getString(R.string.error_occur_downloading_addon, addonName), false);
             Timber.w(e.getLocalizedMessage());
         }
     }
