@@ -31,6 +31,7 @@ public class AddonInfo {
     public static final String NOTE_EDITOR_ADDON = "note-editor";
 
     private String name;
+    private String addonTitle; // for showing in AnkiDroid
     private String version;
     private String description;
     private String main;
@@ -45,6 +46,11 @@ public class AddonInfo {
 
     public String getName() {
         return name;
+    }
+
+
+    public String getAddonTitle() {
+        return addonTitle;
     }
 
 
@@ -107,13 +113,13 @@ public class AddonInfo {
         boolean jsAddonKeywordsPresent = false;
 
         // either fields not present in package.json or failed to parse the fields
-        if (addonInfo.getName() == null || addonInfo.getMain() == null || addonInfo.getAnkidroidJsApi() == null
+        if (addonInfo.getName() == null || addonInfo.getAddonTitle() == null || addonInfo.getMain() == null || addonInfo.getAnkidroidJsApi() == null
                 || addonInfo.getAddonType() == null || addonInfo.getHomepage() == null || addonInfo.getKeywords() == null) {
             return false;
         }
 
         // if fields are empty
-        if (addonInfo.getName().isEmpty() || addonInfo.getMain().isEmpty() || addonInfo.getAnkidroidJsApi().isEmpty()
+        if (addonInfo.getName().isEmpty() || addonInfo.getAddonTitle().isEmpty() || addonInfo.getMain().isEmpty() || addonInfo.getAnkidroidJsApi().isEmpty()
                 || addonInfo.getAddonType().isEmpty() || addonInfo.getHomepage().isEmpty()) {
             return false;
         }
