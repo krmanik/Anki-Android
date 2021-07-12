@@ -68,7 +68,7 @@ public class NpmPackageDownloader {
 
                 // check if fields like ankidroidJsApi, addonType exists or not
                 if (!AddonInfo.isValidAnkiDroidAddon(mAddonInfo)) {
-                    return mContext.getString(R.string.invalid_js_addon);
+                    return mContext.getString(R.string.is_not_valid_js_addon, mAddonName);
                 }
 
                 String tarballUrl = mAddonInfo.getDist().get("tarball");
@@ -81,20 +81,20 @@ public class NpmPackageDownloader {
                 // extract the .tgz file to AnkiDroid/addons dir
                 boolean extracted = extractAndCopyAddonTgz(downloadFilePath, mAddonName);
                 if (!extracted) {
-                    return mContext.getString(R.string.failed_to_extract_addon_package);
+                    return mContext.getString(R.string.failed_to_extract_addon_package, mAddonInfo.getAddonTitle());
                 }
                 // addonType sent to list the addons in recycler view
-                return mContext.getString(R.string.addon_installed);
+                return mContext.getString(R.string.addon_installed, mAddonInfo.getAddonTitle());
 
             } catch (JsonParseException | JsonMappingException | MalformedURLException e) {
                 Timber.w(e.getLocalizedMessage());
-                return mContext.getString(R.string.invalid_js_addon);
+                return mContext.getString(R.string.is_not_valid_js_addon, mAddonName);
             } catch (UnknownHostException e) {
                 Timber.w(e.getLocalizedMessage());
                 return mContext.getString(R.string.network_no_connection);
             } catch (NullPointerException | IOException e) {
                 Timber.w(e.getLocalizedMessage());
-                return mContext.getString(R.string.error_occur_downloading_addon);
+                return mContext.getString(R.string.error_occur_downloading_addon, mAddonName);
             }
         }
 
