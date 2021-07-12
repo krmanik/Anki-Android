@@ -392,4 +392,5 @@
     <string name="error_occur_downloading_addon">Error occur in downloading addon. Try again</string>
     <string name="failed_to_extract_addon_package">Failed to extract the addon package</string>
     <string name="addon_download" comment="Button text for downloading addons">Install</string>
+    <string name="checking_valid_addon">Checking addon...</string>
 </resources>
