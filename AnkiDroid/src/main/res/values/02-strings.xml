@@ -408,4 +408,5 @@
     <string name="addon_author">Author</string>
     <string name="addon_license">License</string>
     <string name="addon_homepage">Homepage</string>
+    <string name="checking_valid_addon">Checking addon...</string>
 </resources>

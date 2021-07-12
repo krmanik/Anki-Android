@@ -42,6 +42,7 @@ import com.ichi2.anki.analytics.UsageAnalytics;
 import com.ichi2.anki.dialogs.AsyncDialogFragment;
 import com.ichi2.anki.dialogs.DialogHandler;
 import com.ichi2.anki.dialogs.SimpleMessageDialog;
+import com.ichi2.anki.jsaddons.DownloadAddonBroadcastReceiver;
 import com.ichi2.async.CollectionLoader;
 import com.ichi2.compat.customtabs.CustomTabActivityHelper;
 import com.ichi2.compat.customtabs.CustomTabsFallback;
@@ -426,6 +427,14 @@ public class AnkiActivity extends AppCompatActivity implements SimpleMessageDial
                         .setCloseButtonIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_back_arrow_custom_tab))
                         .setColorScheme(getColorScheme())
                         .setDefaultColorSchemeParams(colorSchemeParams);
+
+        // add Install addon to custom tab menu when url start with npmjs
+        if (url.toString().startsWith("https://www.npmjs.com/")) {
+            Intent intent = new Intent(this, DownloadAddonBroadcastReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.addMenuItem(getString(R.string.install_js_addon), pendingIntent);
+            Timber.d("addon_name add button");
+        }
 
         CustomTabsIntent customTabsIntent = builder.build();
         CustomTabsHelper.addKeepAliveExtra(this, customTabsIntent.intent);

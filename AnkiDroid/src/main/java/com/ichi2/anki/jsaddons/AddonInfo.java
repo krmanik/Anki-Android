@@ -35,7 +35,7 @@ public class AddonInfo {
     public static final String JS_ADDON_KEY = "js_addon_key";
 
     private String name;
-    private String addonTitle;
+    private String addonTitle; // for showing in AnkiDroid
     private String version;
     private String description;
     private String main;
