@@ -454,6 +454,11 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <!-- For downloading npm package using menu 'Install Addon' added to Custom Tabs in openUrl() -->
+        <receiver
+            android:name=".jsaddons.DownloadAddonBroadcastReceiver"
+            android:enabled="true">
+        </receiver>
 
         <!-- stuff for Samsung Multi-Window -->
         <uses-library
