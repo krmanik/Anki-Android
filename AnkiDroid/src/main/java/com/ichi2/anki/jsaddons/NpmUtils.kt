@@ -19,7 +19,6 @@ package com.ichi2.anki.jsaddons
 
 object NpmUtils {
     // Update if api get updated
-    // TODO Extract to resources from other classes
     const val ANKIDROID_JS_API = "0.0.1"
     const val ANKIDROID_JS_ADDON_KEYWORDS = "ankidroid-js-addon"
     const val REVIEWER_ADDON = "reviewer"
@@ -62,45 +61,5 @@ object NpmUtils {
         }
 
         return addonName
-    }
-
-    /**
-     * Check if npm package is valid or not by fields ankidroidJsApi, keywords (ankidroid-js-addon) and
-     * addon_type (reviewer or note editor) in addonModel
-     *
-     * @param addonModel mapped readvalue of fecthed npm package.json
-     * @return true for valid addon else false
-     */
-    fun isvalidAnkiDroidAddon(addonModel: AddonModel): Boolean {
-        var jsAddonKeywordsPresent = false
-
-        // either fields not present in package.json or failed to parse the fields
-        if (addonModel.name == null || addonModel.addonTitle == null || addonModel.main == null ||
-            addonModel.ankidroidJsApi == null || addonModel.addonType == null || addonModel.homepage == null ||
-            addonModel.keywords == null
-        ) {
-            return false
-        }
-
-        // if fields are empty
-        if (addonModel.name.isEmpty() || addonModel.addonTitle.isEmpty() || addonModel.main.isEmpty() ||
-            addonModel.ankidroidJsApi.isEmpty() || addonModel.addonType.isEmpty() || addonModel.homepage.isEmpty()
-        ) {
-            return false
-        }
-
-        // check if ankidroid-js-addon present or not in mapped addonModel
-        for (keyword in addonModel.keywords) {
-            if (keyword == ANKIDROID_JS_ADDON_KEYWORDS) {
-                jsAddonKeywordsPresent = true
-                break
-            }
-        }
-
-        // addon package.json should have js_api_version, ankidroid-js-addon keywords and addon type
-        return (
-            addonModel.ankidroidJsApi == ANKIDROID_JS_API && jsAddonKeywordsPresent &&
-                (addonModel.addonType == REVIEWER_ADDON || addonModel.addonType == NOTE_EDITOR_ADDON)
-            )
     }
 }

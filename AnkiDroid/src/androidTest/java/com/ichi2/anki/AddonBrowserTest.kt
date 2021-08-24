@@ -5,10 +5,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ichi2.anki.jsaddons.Addon.isValidAnkiDroidAddon
 import com.ichi2.anki.jsaddons.AddonModel
 import com.ichi2.anki.jsaddons.NpmPackageTgzExtract
 import com.ichi2.anki.jsaddons.NpmUtils.ANKIDROID_JS_ADDON_KEYWORDS
-import com.ichi2.anki.jsaddons.NpmUtils.isvalidAnkiDroidAddon
 import com.ichi2.anki.tests.InstrumentedTest
 import com.ichi2.anki.tests.Shared
 import junit.framework.TestCase.*
@@ -65,7 +65,7 @@ open class AddonBrowserTest : InstrumentedTest() {
         val addonModel: AddonModel = mapper.readValue(File(packageJsonPath.toString()), AddonModel::class.java)
 
         // test addon is valid
-        assertTrue(isvalidAnkiDroidAddon(addonModel))
+        assertTrue(isValidAnkiDroidAddon(addonModel))
         assertEquals("valid-ankidroid-js-addon-test", addonModel.name)
         assertEquals("Valid AnkiDroid JS Addon", addonModel.addonTitle)
         assertEquals("0.0.1", addonModel.ankidroidJsApi)
@@ -111,6 +111,6 @@ open class AddonBrowserTest : InstrumentedTest() {
         val addonModel: AddonModel = mapper.readValue(File(packageJsonPath.toString()), AddonModel::class.java)
 
         // test addon is not valid
-        assertFalse(isvalidAnkiDroidAddon(addonModel))
+        assertFalse(isValidAnkiDroidAddon(addonModel))
     }
 }
