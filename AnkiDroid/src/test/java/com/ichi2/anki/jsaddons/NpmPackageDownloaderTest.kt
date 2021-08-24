@@ -9,6 +9,7 @@ import com.ichi2.anki.jsaddons.NpmPackageDownloader.DownloadAddon
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.URL
 import java.util.concurrent.ExecutionException
 
 @RunWith(AndroidJUnit4::class)
@@ -24,7 +25,8 @@ class NpmPackageDownloaderTest : RobolectricTest() {
     fun validAddonTest() {
         // assumeThat(Connection.isOnline(), `is`(true))
 
-        val result: String? = DownloadAddon(context, VALID_ADDON_PACKAGE_NAME).download()
+        val url = URL(context.getString(R.string.npmjs_registry, VALID_ADDON_PACKAGE_NAME))
+        val result: String? = DownloadAddon(context, VALID_ADDON_PACKAGE_NAME).download(url)
 
         // this string is in toast when addon successfully installed
         // download() function return 'Valid AnkiDroid JS Addon JavaScript addon installed'
@@ -38,7 +40,8 @@ class NpmPackageDownloaderTest : RobolectricTest() {
     fun invalidAddonTest() {
         // assumeThat(Connection.isOnline(), `is`(true))
 
-        val result: String? = DownloadAddon(context, NOT_VALID_ADDON_PACKAGE_NAME).download()
+        val url = URL(context.getString(R.string.npmjs_registry, NOT_VALID_ADDON_PACKAGE_NAME))
+        val result: String? = DownloadAddon(context, NOT_VALID_ADDON_PACKAGE_NAME).download(url)
 
         // this string is in toast when not valid addon requested
         // download() function return, 'addon-name not a valid js addons package for AnkiDroid'

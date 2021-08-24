@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ichi2.anki.CollectionHelper
 import com.ichi2.anki.R
 import com.ichi2.anki.UIUtils
-import com.ichi2.anki.jsaddons.NpmUtils.isvalidAnkiDroidAddon
+import com.ichi2.anki.jsaddons.Addon.isValidAnkiDroidAddon
 import com.ichi2.anki.web.HttpFetcher
 import com.ichi2.async.ProgressSenderAndCancelListener
 import com.ichi2.async.TaskDelegate
@@ -41,7 +41,8 @@ class NpmPackageDownloader {
     class DownloadAddon(private val mContext: Context, private val mNpmPackageName: String) : TaskDelegate<Void?, String?>() {
 
         override fun task(col: Collection, collectionTask: ProgressSenderAndCancelListener<Void?>): String? {
-            return download()
+            val url = URL(mContext.getString(R.string.npmjs_registry, mNpmPackageName))
+            return download(url)
         }
 
         /**
@@ -51,15 +52,15 @@ class NpmPackageDownloader {
          *
          * For invalid addon or for exception occurred, it returns message to respective to the errors from catch block
          */
-        fun download(): String? {
+        fun download(url: URL): String? {
             try {
                 // mapping for json fetched from http://registry.npmjs.org/ankidroid-js-addon-.../latest
                 val mapper = ObjectMapper()
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                val addonModel = mapper.readValue(URL(mContext.getString(R.string.npmjs_registry, mNpmPackageName)), AddonModel::class.java)
+                val addonModel = mapper.readValue(url, AddonModel::class.java)
 
                 // check if fields like ankidroidJsApi, addonType exists or not
-                if (!isvalidAnkiDroidAddon(addonModel)) {
+                if (!isValidAnkiDroidAddon(addonModel)) {
                     return mContext.getString(R.string.is_not_valid_js_addon, mNpmPackageName)
                 }
 
@@ -105,7 +106,7 @@ class NpmPackageDownloader {
          * @param tarballPath    path to downloaded js-addon.tgz file
          * @param npmPackageName addon name, e.g ankidroid-js-addon-progress-bar
          */
-        fun extractAndCopyAddonTgz(tarballPath: String?, npmPackageName: String): Boolean {
+        fun extractAndCopyAddonTgz(tarballPath: String, npmPackageName: String): Boolean {
             if (tarballPath == null) {
                 return false
             }
@@ -125,10 +126,10 @@ class NpmPackageDownloader {
                 NpmPackageTgzExtract.extractTarGzipToAddonFolder(tarballFile, addonsPackageDir)
                 Timber.d("js addon .tgz extracted")
             } catch (e: IOException) {
-                Timber.e(e.localizedMessage)
+                Timber.w(e.localizedMessage)
                 return false
             } catch (e: ArchiveException) {
-                Timber.e(e.localizedMessage)
+                Timber.w(e.localizedMessage)
                 return false
             } finally {
                 tarballFile.delete()
