@@ -28,6 +28,9 @@ import com.ichi2.anki.jsaddons.NpmUtils.getAddonNameFromUrl
 import com.ichi2.async.TaskManager
 import timber.log.Timber
 
+/**
+ * This is called when user click 'Install Addon' in options menu of custom tabs which open https://npmjs.org url
+ */
 class DownloadAddonBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val url = intent.data.toString()
