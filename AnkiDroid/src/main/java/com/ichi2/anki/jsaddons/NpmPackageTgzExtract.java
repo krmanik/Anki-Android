@@ -84,7 +84,7 @@ public class NpmPackageTgzExtract {
      * @throws FileNotFoundException if .tgz file or ungzipped file i.e. .tar file not found
      * @throws IOException
      */
-    public static void extractTarGzipToAddonFolder(File tarballFile, File addonsDir) throws IOException, ArchiveException {
+    public static void extractTarGzipToAddonFolder(File tarballFile, File addonsDir) throws Exception {
         if (!isGzip(tarballFile)) {
             throw new IllegalArgumentException(String.format("%s is not a valid .tgz file.", tarballFile.getAbsolutePath()));
         }
@@ -135,39 +135,77 @@ public class NpmPackageTgzExtract {
      * @throws ArchiveException
      * @throws IOException
      */
-    public static void unTar(File inputFile, File outputDir) throws ArchiveException, IOException {
+    public static void unTar(File inputFile, File outputDir) throws Exception {
         Timber.i("Untaring %s to dir %s.", inputFile.getAbsolutePath(), outputDir.getAbsolutePath());
-        final InputStream inputStream = new FileInputStream(inputFile);
-        TarArchiveInputStream tarInputStream = (TarArchiveInputStream) new ArchiveStreamFactory()
-                .createArchiveInputStream("tar", inputStream);
 
-        TarArchiveEntry entry = null;
-        while ((entry = (TarArchiveEntry) tarInputStream.getNextEntry()) != null) {
-            File outputFile = new File(outputDir, entry.getName());
+        try (InputStream inputStream = new FileInputStream(inputFile);
+             TarArchiveInputStream tarInputStream = (TarArchiveInputStream)
+                     new ArchiveStreamFactory().createArchiveInputStream("tar", inputStream)) {
 
-            if (entry.isDirectory()) {
-                Timber.i("Untaring %s to dir %s.", inputFile.getAbsolutePath(), outputDir.getAbsolutePath());
-                if (!outputFile.exists()) {
-                    Timber.i("Attempting to create output directory %s.", outputFile.getAbsolutePath());
-                    if (!outputFile.mkdirs()) {
-                        throw new IllegalStateException(String.format("Couldn't create directory %s.", outputFile.getAbsolutePath()));
-                    }
+            TarArchiveEntry entry = null;
+            while ((entry = (TarArchiveEntry) tarInputStream.getNextEntry()) != null) {
+                File outputFile = new File(outputDir, entry.getName());
+
+                // Zip Slip Vulnerability https://snyk.io/research/zip-slip-vulnerability
+                zipPathSafety(outputFile, outputDir);
+
+                if (entry.isDirectory()) {
+                    unTarDir(inputFile, outputDir, outputFile);
+                } else {
+                    unTarFile(tarInputStream, entry, outputDir, outputFile);
                 }
-            } else {
-                Timber.i("Creating output file %s.", outputFile.getAbsolutePath());
-                File currentFile = new File(outputDir, entry.getName());
-                File parent = currentFile.getParentFile();  // this line important otherwise FileNotFoundException
-                if (parent != null && !parent.exists()) {
-                    if (!parent.mkdirs()) {
-                        throw new IOException(String.format("Couldn't create directory %s.", parent.getAbsolutePath()));
-                    }
-                }
-                final OutputStream outputFileStream = new FileOutputStream(outputFile);
-                IOUtils.copy(tarInputStream, outputFileStream);
-                outputFileStream.close();
             }
         }
-        inputStream.close();
-        tarInputStream.close();
+    }
+
+
+    /**
+     * UnTar file from archive using input stream, entry to output dir
+     * @param tarInputStream TarArchiveInputStream
+     * @param entry TarArchiveEntry
+     * @param outputDir Output directory
+     * @param outputFile Output file
+     * @throws IOException
+     */
+    private static void unTarFile(TarArchiveInputStream tarInputStream, TarArchiveEntry entry, File outputDir, File outputFile) throws IOException {
+        Timber.i("Creating output file %s.", outputFile.getAbsolutePath());
+        File currentFile = new File(outputDir, entry.getName());
+        File parent = currentFile.getParentFile();  // this line important otherwise FileNotFoundException
+        if (parent != null && !parent.exists()) {
+            if (!parent.mkdirs()) {
+                throw new IOException(String.format("Couldn't create directory %s.", parent.getAbsolutePath()));
+            }
+        }
+
+        final OutputStream outputFileStream = new FileOutputStream(outputFile);
+        IOUtils.copy(tarInputStream, outputFileStream);
+        outputFileStream.close();
+    }
+
+
+    /**
+     * UnTar directory to output dir
+     * @param inputFile archive input file
+     * @param outputDir Output directory
+     * @param outputFile Output file
+     */
+    private static void unTarDir(File inputFile, File outputDir, File outputFile) {
+        Timber.i("Untaring %s to dir %s.", inputFile.getAbsolutePath(), outputDir.getAbsolutePath());
+        if (!outputFile.exists()) {
+            Timber.i("Attempting to create output directory %s.", outputFile.getAbsolutePath());
+            if (!outputFile.mkdirs()) {
+                throw new IllegalStateException(String.format("Couldn't create directory %s.", outputFile.getAbsolutePath()));
+            }
+        }
+    }
+
+
+    // Zip Slip Vulnerability https://snyk.io/research/zip-slip-vulnerability
+    private static void zipPathSafety(File outputFile, File destDirectory) throws ArchiveException, IOException {
+        String destDirCanonicalPath = destDirectory.getCanonicalPath();
+        String outputFileCanonicalPath = outputFile.getCanonicalPath();
+        if (!outputFileCanonicalPath.startsWith(destDirCanonicalPath)) {
+            throw new ArchiveException(String.format("Entry is outside of the target dir: %s", outputFileCanonicalPath));
+        }
     }
 }
