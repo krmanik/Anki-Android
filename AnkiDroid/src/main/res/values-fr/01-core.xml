@@ -114,6 +114,9 @@
     <string name="menu_flag_card_two">Drapeau orange</string>
     <string name="menu_flag_card_three">Drapeau vert</string>
     <string name="menu_flag_card_four">Drapeau bleu</string>
+    <string name="menu_flag_card_five">Pink flag</string>
+    <string name="menu_flag_card_six">Turquoise flag</string>
+    <string name="menu_flag_card_seven">Purple flag</string>
     <string name="menu_edit_tags">Modifier les étiquettes</string>
     <string name="delete_note_message">Voulez-vous vraiment supprimer cette note et toutes ses cartes ?\n%s</string>
     <string name="menu_select">Sélectionner le texte</string>
@@ -184,11 +187,15 @@
     <string name="card_template_editor_styling">Style</string>
     <string name="card_template_editor_menu_card_browser_appearance">Apparence du navigateur de cartes</string>
     <string name="card_template_editor_deck_override">Forcer le paquet</string>
-    <string name="card_template_editor_insert_field">Insert field</string>
-    <string name="card_template_editor_select_field">Select field</string>
+    <string name="card_template_editor_insert_field">Ajouter un champ</string>
+    <string name="card_template_editor_select_field">Sélectionner un champ</string>
     <string name="card_template_editor_cant_delete">Il faut au moins un type de carte.</string>
+    <plurals name="card_template_editor_confirm_add">
+        <item quantity="one">Cela va créer %1$d carte. Continuer ?</item>
+        <item quantity="other">Cela va créer %1$d cartes. Continuer ?</item>
+    </plurals>
     <plurals name="card_template_editor_confirm_delete">
-        <item quantity="one">Supprimer le type de carte « %2$s » et la carte qu\'il contient ?</item>
+        <item quantity="one">Supprimer le type de carte « %2$s » et son %1$d carte ?</item>
         <item quantity="other">Supprimer le type de carte “%2$s” et ses %1$d cartes ?</item>
     </plurals>
     <string name="invalid_template">Une carte n\'a pas pu être générée</string>
@@ -226,4 +233,5 @@
         <item quantity="one">%1$d carte (0 à faire)</item>
         <item quantity="other">%1$d cartes (0 à faire)</item>
     </plurals>
+    <string name="copy_note_type_name" comment="The new name of a copied note type">%s copy</string>
 </resources>

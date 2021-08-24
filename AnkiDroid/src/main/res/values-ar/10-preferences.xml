@@ -130,7 +130,7 @@
     <string name="sync_fetch_missing_media_summ">جلب الوسائط المفقودة تلقائيًا عند المزامنة</string>
     <string name="sync_account" maxLength="41">حساب أنكي ويب</string>
     <string name="sync_account_summ_logged_out">لست مسجلًا الدخول</string>
-    <string name="sync_account_summ_logged_in">%s</string>
+    <string name="sync_account_summ_logged_in" comment="The summary for the account setting when logged in. Parameter is the username (email)">%s</string>
     <string name="automatic_sync_choice" maxLength="41">مزامنة تلقائية</string>
     <string name="automatic_sync_choice_summ">مزامنة تلقائية عند بدء/إغلاق التطبيق إذا مضى على المزامنة الأخيرة        أكثر من 10 دقائق.</string>
     <string name="sync_status_badge" maxLength="41">عرض حالة المزامنة</string>
@@ -189,7 +189,6 @@
     <string name="sched_v2" maxLength="41">المجدول الإصدار 2</string>
     <string name="sched_v2_summ">تمكين الجدولة الجديدة. فرض التغيير في اتجاه واحد على المزامنة التالية</string>
     <string name="sched_ver_toggle_title">تأكيد</string>
-    <string name="sched_ver_2to1">سيؤدي هذا إلى إعادة البطاقات في طور التعلم إلى بطاقات جديدة، ومسح الرزم المفلترة، وتغيير إصدار المجدول. هل تريد الاستمرار؟</string>
     <string name="sched_ver_1to2">قد يسبب المجدول التجريبي مزامنة خاطئة. لا تنسَ قراءة الوثائق أولًا. هل تريد الاستمرار؟</string>
     <string name="pref_keep_screen_on" maxLength="41">إبقاء الشاشة مضيئة</string>
     <string name="pref_keep_screen_on_summ">تعطيل مهلة الشاشة</string>
@@ -210,8 +209,8 @@
     <!-- Paste clipboard image as png option -->
     <string name="paste_as_png" maxLength="41">لصق صور الحافظة كـ PNG</string>
     <string name="paste_as_png_summary">بشكل افتراضي يلصق أنكي الصور في الحافظة بصيغة JPG لتوفير مساحة القرص. تستطيع استخدام هذا الخيار للصق الصور بصيعة PNG بدلًا من ذلك.</string>
-    <string name="exit_via_double_tap_back" maxLength="41">Press back twice to go back/exit</string>
-    <string name="exit_via_double_tap_back_summ">To avoid accidentally leaving the reviewer or the app</string>
+    <string name="exit_via_double_tap_back" maxLength="41">اضغط رجوع مرتين للعودة أو الخروج</string>
+    <string name="exit_via_double_tap_back_summ">لتجنب مغادرة شاشة المراجعة أو التطبيق بدون قصد</string>
     <!-- Advanced statistics settings -->
     <string name="advanced_statistics_title" maxLength="41">إحصائيات متقدمة</string>
     <string name="enable_advanced_statistics_title" maxLength="41">تفعيل الإحصائيات المتقدمة</string>
@@ -318,5 +317,15 @@
     <string name="type_in_answer_focus_summ">التركيز التلقائي على حقل «أدخل الإجابة» في شاشة المراجعة</string>
     <!-- Open Changelog-->
     <string name="open_changelog">فتح سجل التغييرات</string>
-    <string name="binding_add_gesture">Add gesture</string>
+    <string name="binding_add_gesture">إضافة إيماءة</string>
+    <string name="binding_add_key">إضافة مفتاح</string>
+    <string name="key_picker_default_press_key">ضغط مفتاح</string>
+    <!-- Select card side -->
+    <string name="card_side_selection_title">حدد جانب بطاقة</string>
+    <string name="card_side_question">سؤال</string>
+    <string name="card_side_answer">جواب</string>
+    <string name="card_side_both">سؤال &amp; جواب</string>
+    <string name="display_binding_card_side_question" comment="When displaying a key bind on a preference this formatter is used if the bind only applies to the question">س: %s</string>
+    <string name="display_binding_card_side_answer" comment="When displaying a key bind on a preference this formatter is used if the bind only applies to the answer">ج: %s</string>
+    <string name="display_binding_card_side_both" comment="When displaying a key bind on a preference this formatter is used if the bind only applies to both the question and the answer">%s</string>
 </resources>

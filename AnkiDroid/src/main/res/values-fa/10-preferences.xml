@@ -130,7 +130,7 @@
     <string name="sync_fetch_missing_media_summ">هنگام همگام سازی، بطور خودکار رسانه گم شده را بیاور.</string>
     <string name="sync_account" maxLength="41">حساب کاربری آنکی وب</string>
     <string name="sync_account_summ_logged_out">هنوز وارد سایت نشده</string>
-    <string name="sync_account_summ_logged_in">%s</string>
+    <string name="sync_account_summ_logged_in" comment="The summary for the account setting when logged in. Parameter is the username (email)">%s</string>
     <string name="automatic_sync_choice" maxLength="41">همگام سازی خودکار</string>
     <string name="automatic_sync_choice_summ">همگام سازی خودکار موقع ورود و خروج از برنامه اگر از آخرین همگام سازی بیشتر از 10 دقیقه گذشته باشد.</string>
     <string name="sync_status_badge" maxLength="41">Display synchronization status</string>
@@ -189,7 +189,6 @@
     <string name="sched_v2" maxLength="41">V2 scheduler</string>
     <string name="sched_v2_summ">Enable the new scheduler. Forces changes in one direction on next sync</string>
     <string name="sched_ver_toggle_title">تایید</string>
-    <string name="sched_ver_2to1">این عمل همۀ کارت‌های موجود در مراحل یادگیری و یادگیری دوباره را به حالت تازه وارد کرده، همه دسته‌های فیلترشده را پاک و نسخۀ سیستم زمانبندی کارت‌ها را عوض خواهد کرد. آیا از انجام این عمل مطمئن هستید؟</string>
     <string name="sched_ver_1to2">سیستم زمانبندی آزمایشی ممکن است کارت‌ها را اشتباه زمانبندی کند. لطفاً قبل از اعمال تغییرات راهنما را بخوانید. اعمال تغییرات؟</string>
     <string name="pref_keep_screen_on" maxLength="41">روشن نگه‌داشتن صفحه</string>
     <string name="pref_keep_screen_on_summ">غیرفعال کردن زمان خاموش شدن صفحه نمایش</string>
@@ -311,4 +310,14 @@
     <!-- Open Changelog-->
     <string name="open_changelog">Open Changelog</string>
     <string name="binding_add_gesture">Add gesture</string>
+    <string name="binding_add_key">Add key</string>
+    <string name="key_picker_default_press_key">Press a key</string>
+    <!-- Select card side -->
+    <string name="card_side_selection_title">Select card side</string>
+    <string name="card_side_question">Question</string>
+    <string name="card_side_answer">Answer</string>
+    <string name="card_side_both">Question &amp; Answer</string>
+    <string name="display_binding_card_side_question" comment="When displaying a key bind on a preference this formatter is used if the bind only applies to the question">Q: %s</string>
+    <string name="display_binding_card_side_answer" comment="When displaying a key bind on a preference this formatter is used if the bind only applies to the answer">A: %s</string>
+    <string name="display_binding_card_side_both" comment="When displaying a key bind on a preference this formatter is used if the bind only applies to both the question and the answer">%s</string>
 </resources>

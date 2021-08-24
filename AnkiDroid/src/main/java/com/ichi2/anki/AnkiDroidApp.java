@@ -187,12 +187,6 @@ public class AnkiDroidApp extends Application {
      */
     public static final int CHECK_DB_AT_VERSION = 21000172;
 
-    /**
-     * The latest package version number that included changes to the preferences that requires handling. All
-     * collections being upgraded to (or after) this version must update preferences.
-     */
-    public static final int CHECK_PREFERENCES_AT_VERSION = 20500225;
-
     /** Our ACRA configurations, initialized during onCreate() */
     private CoreConfigurationBuilder mAcraCoreConfigBuilder;
 
@@ -322,20 +316,17 @@ public class AnkiDroidApp extends Application {
             UIUtils.showThemedToast(this.getApplicationContext(), getString(R.string.user_is_a_robot), false);
         }
 
+        // make default HTML / JS debugging true for debug build
+        if (BuildConfig.DEBUG) {
+            preferences.edit().putBoolean("html_javascript_debugging", true).apply();
+        }
+        
         CardBrowserContextMenu.ensureConsistentStateWithSharedPreferences(this);
         AnkiCardContextMenu.ensureConsistentStateWithSharedPreferences(this);
         NotificationChannels.setup(getApplicationContext());
 
         // Configure WebView to allow file scheme pages to access cookies.
-        try {
-            CookieManager.setAcceptFileSchemeCookies(true);
-        } catch (Throwable e) {
-            // 5794: Errors occur if the WebView fails to load
-            // android.webkit.WebViewFactory.MissingWebViewPackageException.MissingWebViewPackageException
-            // Error may be excessive, but I expect a UnsatisfiedLinkError to be possible here.
-            this.mWebViewError = e;
-            sendExceptionReport(e, "setAcceptFileSchemeCookies");
-            Timber.e(e, "setAcceptFileSchemeCookies");
+        if (!acceptFileSchemeCookies()) {
             return;
         }
 
@@ -364,6 +355,22 @@ public class AnkiDroidApp extends Application {
         NotificationService ns = new NotificationService();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(ns, new IntentFilter(NotificationService.INTENT_ACTION));
+    }
+
+    @SuppressWarnings("deprecation") // 7109: setAcceptFileSchemeCookies
+    protected boolean acceptFileSchemeCookies() {
+        try {
+            CookieManager.setAcceptFileSchemeCookies(true);
+            return true;
+        } catch (Throwable e) {
+            // 5794: Errors occur if the WebView fails to load
+            // android.webkit.WebViewFactory.MissingWebViewPackageException.MissingWebViewPackageException
+            // Error may be excessive, but I expect a UnsatisfiedLinkError to be possible here.
+            this.mWebViewError = e;
+            sendExceptionReport(e, "setAcceptFileSchemeCookies");
+            Timber.e(e, "setAcceptFileSchemeCookies");
+            return false;
+        }
     }
 
 

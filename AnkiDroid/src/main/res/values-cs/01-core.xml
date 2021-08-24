@@ -83,10 +83,10 @@
     <string name="no_cards_placeholder_description">Začněte přidávat karty\npoužitím ikony +.</string>
     <!-- The deck picker via AnkiStatsTaskHandler.java -->
     <plurals name="studied_cards_today">
-        <item quantity="one">Dnes studována %1$d karta během %2$s</item>
-        <item quantity="few">Dnes studovány %1$d karty během %2$s</item>
-        <item quantity="many">Dnes studováno %1$d karty během %2$s</item>
-        <item quantity="other">Dnes studováno %1$d karet během %2$s</item>
+        <item quantity="one">Dnes studována %1$d karta za %2$s</item>
+        <item quantity="few">Dnes studovány %1$d karty za %2$s</item>
+        <item quantity="many">Dnes studováno %1$d karty za %2$s</item>
+        <item quantity="other">Dnes studováno %1$d karet za %2$s</item>
     </plurals>
     <!-- flashcard_portrait.xml -->
     <string name="type_answer_hint">Napište odpověď</string>
@@ -124,6 +124,9 @@
     <string name="menu_flag_card_two">Oranžový příznak</string>
     <string name="menu_flag_card_three">Zelený příznak</string>
     <string name="menu_flag_card_four">Modrý příznak</string>
+    <string name="menu_flag_card_five">Růžový příznak</string>
+    <string name="menu_flag_card_six">Tyrkysový příznak</string>
+    <string name="menu_flag_card_seven">Purpurový příznak</string>
     <string name="menu_edit_tags">Upravit štítky</string>
     <string name="delete_note_message">Opravdu smazat poznámku a všechny její karty?\n%s</string>
     <string name="menu_select">Vybrat text</string>
@@ -197,6 +200,12 @@
     <string name="card_template_editor_insert_field">Vložit pole</string>
     <string name="card_template_editor_select_field">Vybrat pole</string>
     <string name="card_template_editor_cant_delete">Je vyžadován alespoň jeden typ karty</string>
+    <plurals name="card_template_editor_confirm_add">
+        <item quantity="one">Bude vytvořena %1$d karta. Pokračovat?</item>
+        <item quantity="few">Budou vytvořeny %1$d karty. Pokračovat?</item>
+        <item quantity="many">Bude vytvořeno %1$d karty. Pokračovat?</item>
+        <item quantity="other">Bude vytvořeno %1$d karet. Pokračovat?</item>
+    </plurals>
     <plurals name="card_template_editor_confirm_delete">
         <item quantity="one">Odstranit typ karty „%2$s“ a jeho %1$d kartu?</item>
         <item quantity="few">Odstranit typ karty „%2$s“ a jeho %1$d karty?</item>
@@ -240,4 +249,5 @@
         <item quantity="many">%1$d karty (0 ke zkoušení)</item>
         <item quantity="other">%1$d karet (0 ke zkoušení)</item>
     </plurals>
+    <string name="copy_note_type_name" comment="The new name of a copied note type">%s copy</string>
 </resources>

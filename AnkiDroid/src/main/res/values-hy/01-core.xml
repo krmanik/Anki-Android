@@ -64,11 +64,11 @@
         <item quantity="other">%d րոպե է մնացել</item>
     </plurals>
     <plurals name="reviewer_window_title_hours">
-        <item quantity="one">%d hour %d left</item>
-        <item quantity="other">%d hours %d left</item>
+        <item quantity="one">What your name?</item>
+        <item quantity="other">%d ঘণ্টা %d বাকি  </item>
     </plurals>
     <plurals name="reviewer_window_title_days">
-        <item quantity="one">%d day %d left</item>
+        <item quantity="one">can we go for dinner?</item>
         <item quantity="other">%d days %d left</item>
     </plurals>
     <string name="no_cards_placeholder_title">Collection is empty</string>
@@ -114,6 +114,9 @@
     <string name="menu_flag_card_two">Orange flag</string>
     <string name="menu_flag_card_three">Green flag</string>
     <string name="menu_flag_card_four">Blue flag</string>
+    <string name="menu_flag_card_five">Pink flag</string>
+    <string name="menu_flag_card_six">Turquoise flag</string>
+    <string name="menu_flag_card_seven">Purple flag</string>
     <string name="menu_edit_tags">Edit tags</string>
     <string name="delete_note_message">Ջնջե՞լ այս գրառումը և նրա բոլոր քարտերը:\n%s</string>
     <string name="menu_select">Ընտրել գրվածքը</string>
@@ -187,6 +190,10 @@
     <string name="card_template_editor_insert_field">Insert field</string>
     <string name="card_template_editor_select_field">Select field</string>
     <string name="card_template_editor_cant_delete">Անհրաժեշտ է քարտի առնվազն մեկ տեսակ</string>
+    <plurals name="card_template_editor_confirm_add">
+        <item quantity="one">This will create %1$d card. Proceed?</item>
+        <item quantity="other">This will create %1$d cards. Proceed?</item>
+    </plurals>
     <plurals name="card_template_editor_confirm_delete">
         <item quantity="one">Ջնջե՞լ «%2$s» քարտերի տեսակը և նրա «%1$d» քարտը:</item>
         <item quantity="other">Ջնջե՞լ «%2$s» քարտերի տեսակը և նրա «%1$d» քարտը:</item>
@@ -226,4 +233,5 @@
         <item quantity="one">%1$d card (0 due)</item>
         <item quantity="other">%1$d cards (0 due)</item>
     </plurals>
+    <string name="copy_note_type_name" comment="The new name of a copied note type">%s copy</string>
 </resources>

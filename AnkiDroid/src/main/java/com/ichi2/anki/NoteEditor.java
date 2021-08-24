@@ -107,7 +107,6 @@ import com.ichi2.themes.StyledProgressDialog;
 import com.ichi2.themes.Themes;
 import com.ichi2.anki.widgets.PopupMenuWithIcons;
 import com.ichi2.utils.AdaptionUtil;
-import com.ichi2.utils.CheckCameraPermission;
 import com.ichi2.utils.FunctionalInterfaces.Consumer;
 import com.ichi2.utils.KeyUtils;
 import com.ichi2.utils.MapUtil;
@@ -253,6 +252,8 @@ public class NoteEditor extends AnkiActivity implements
 
     // Use the same HTML if the same image is pasted multiple times.
     private HashMap<String, String> mPastedImageCache = new HashMap<>();
+
+    private final Onboarding.NoteEditor mOnboarding = new Onboarding.NoteEditor(this);
 
     private SaveNoteHandler saveNoteHandler() {
         return new SaveNoteHandler(this);
@@ -431,6 +432,8 @@ public class NoteEditor extends AnkiActivity implements
         }
 
         startLoadingCollection();
+
+        mOnboarding.onCreate();
     }
 
     @Override
@@ -607,7 +610,7 @@ public class NoteEditor extends AnkiActivity implements
         if (!mAddNote && mEditorNote.model().getJSONArray("tmpls").length()>1) {
             deckTextView.setText(R.string.CardEditorCardDeck);
         }
-        mDeckSpinnerSelection = new DeckSpinnerSelection(this, R.id.note_deck_spinner);
+        mDeckSpinnerSelection = new DeckSpinnerSelection(this, col, this.findViewById(R.id.note_deck_spinner));
         mDeckSpinnerSelection.initializeNoteEditorDeckSpinner(mCurrentEditedCard, mAddNote);
 
         mCurrentDid = intent.getLongExtra(EXTRA_DID, mCurrentDid);
@@ -1563,12 +1566,6 @@ public class NoteEditor extends AnkiActivity implements
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.popupmenu_multimedia_options, popup.getMenu());
 
-                /* To check whether Camera Permission is asked in AndroidManifest.xml */
-                if (!CheckCameraPermission.manifestContainsPermission(this)) {
-                    MenuItem item = popup.getMenu().findItem(R.id.menu_multimedia_photo);
-                    item.setVisible(false);
-                }
-
                 popup.setOnMenuItemClickListener(item -> {
 
                     int itemId = item.getItemId();
@@ -1804,10 +1801,9 @@ public class NoteEditor extends AnkiActivity implements
             return;
         }
         if (note == null || mAddNote || mCurrentEditedCard == null) {
-            JSONObject conf = getCol().getConf();
             JSONObject model = getCol().getModels().current();
-            if (conf.optBoolean("addToCur", true)) {
-                mCurrentDid = conf.getLong("curDeck");
+            if (getCol().get_config("addToCur", true)) {
+                mCurrentDid = getCol().get_config_long("curDeck");
                 if (getCol().getDecks().isDyn(mCurrentDid)) {
                     /*
                      * If the deck in mCurrentDid is a filtered (dynamic) deck, then we can't create cards in it,
@@ -2109,7 +2105,7 @@ public class NoteEditor extends AnkiActivity implements
                 currentDeck.put("mid", newId);
                 getCol().getDecks().save(currentDeck);
                 // Update deck
-                if (!getCol().getConf().optBoolean("addToCur", true)) {
+                if (!getCol().get_config("addToCur", true)) {
                     mCurrentDid = model.getLong("did");
                 }
 

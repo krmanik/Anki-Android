@@ -108,7 +108,6 @@ import com.ichi2.anki.dialogs.customstudy.CustomStudyDialogFactory;
 import com.ichi2.anki.exception.ConfirmModSchemaException;
 import com.ichi2.anki.exception.FilteredAncestor;
 import com.ichi2.anki.receiver.SdCardReceiver;
-import com.ichi2.anki.reviewer.FullScreenMode;
 import com.ichi2.anki.stats.AnkiStatsTaskHandler;
 import com.ichi2.anki.web.HostNumFactory;
 import com.ichi2.anki.widgets.DeckAdapter;
@@ -124,6 +123,7 @@ import com.ichi2.libanki.Card;
 import com.ichi2.libanki.Collection;
 import com.ichi2.libanki.Decks;
 import com.ichi2.libanki.Model;
+import com.ichi2.libanki.ModelManager;
 import com.ichi2.libanki.Models;
 import com.ichi2.libanki.Utils;
 import com.ichi2.libanki.importer.AnkiPackageImporter;
@@ -538,6 +538,8 @@ public class DeckPicker extends NavigationDrawerActivity implements
         mReviewSummaryTextView = findViewById(R.id.today_stats_text_view);
 
         mShortAnimDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        new Onboarding.DeckPicker(this, mRecyclerViewLayoutManager).onCreate();
     }
 
     /**
@@ -572,7 +574,7 @@ public class DeckPicker extends NavigationDrawerActivity implements
                 break;
             case DIRECTORY_NOT_ACCESSIBLE:
                 Timber.i("AnkiDroid directory inaccessible");
-                Intent i = Preferences.getPreferenceSubscreenIntent(this, "com.ichi2.anki.prefs.advanced");
+                Intent i = Preferences.AdvancedSettingsFragment.getSubscreenIntent(this);
                 startActivityForResultWithoutAnimation(i, REQUEST_PATH_UPDATE);
                 UIUtils.showThemedToast(this, R.string.directory_inaccessible, false);
                 break;
@@ -678,7 +680,8 @@ public class DeckPicker extends NavigationDrawerActivity implements
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // Null check to prevent crash when col inaccessible
-        if (!colIsOpen()) {
+        // #9081: sync leaves the collection closed, thus colIsOpen() is insufficient, carefully open the collection if possible
+        if (CollectionHelper.getInstance().getColSafe(this) == null) {
             return false;
         }
         return super.onPrepareOptionsMenu(menu);
@@ -1166,11 +1169,9 @@ public class DeckPicker extends NavigationDrawerActivity implements
             Timber.i("No space left");
             showDialogFragment(DeckPickerBackupNoSpaceLeftDialog.newInstance());
             preferences.edit().remove("noSpaceLeft").apply();
-        } else if ("".equals(preferences.getString("lastVersion", ""))) {
-            Timber.i("Fresh install");
-            preferences.edit().putString("lastVersion", VersionUtils.getPkgVersionName()).apply();
+        } else if (InitialActivity.performSetupFromFreshInstallOrClearedPreferences(preferences)) {
             onFinishedStartup();
-        } else if (skip < 2 && !preferences.getString("lastVersion", "").equals(VersionUtils.getPkgVersionName())) {
+        } else if (skip < 2 && !InitialActivity.isLatestVersion(preferences)) {
             Timber.i("AnkiDroid is being updated and a collection already exists.");
             // The user might appreciate us now, see if they will help us get better?
             if (!preferences.contains(UsageAnalytics.ANALYTICS_OPTIN_KEY)) {
@@ -1212,7 +1213,7 @@ public class DeckPicker extends NavigationDrawerActivity implements
             if (previous < 20600123) {
                 Timber.i("Fixing font-family definition in templates");
                 try {
-                    Models models = getCol().getModels();
+                    ModelManager models = getCol().getModels();
                     for (Model m : models.all()) {
                         String css = m.getString("css");
                         if (css.contains("font-familiy")) {
@@ -1227,16 +1228,9 @@ public class DeckPicker extends NavigationDrawerActivity implements
             }
 
             // Check if preference upgrade or database check required, otherwise go to new feature screen
-            int upgradePrefsVersion = AnkiDroidApp.CHECK_PREFERENCES_AT_VERSION;
             int upgradeDbVersion = AnkiDroidApp.CHECK_DB_AT_VERSION;
 
             // Specifying a checkpoint in the future is not supported, please don't do it!
-            if (current < upgradePrefsVersion) {
-                Timber.e("Checkpoint in future produced.");
-                UIUtils.showSimpleSnackbar(this, "Invalid value for CHECK_PREFERENCES_AT_VERSION", false);
-                onFinishedStartup();
-                return;
-            }
             if (current < upgradeDbVersion) {
                 Timber.e("Invalid value for CHECK_DB_AT_VERSION");
                 UIUtils.showSimpleSnackbar(this, "Invalid value for CHECK_DB_AT_VERSION", false);
@@ -1251,59 +1245,55 @@ public class DeckPicker extends NavigationDrawerActivity implements
             //    skipDbCheck = true;
             //}
 
+            boolean upgradedPreferences = InitialActivity.upgradePreferences(this, previous);
+            // Integrity check loads asynchronously and then restart deck picker when finished
             //noinspection ConstantConditions
-            if ((!skipDbCheck && previous < upgradeDbVersion) || previous < upgradePrefsVersion) {
-                if (previous < upgradePrefsVersion) {
-                    Timber.i("showStartupScreensAndDialogs() running upgradePreferences()");
-                    upgradePreferences(previous);
-                }
-                // Integrity check loads asynchronously and then restart deck picker when finished
-                //noinspection ConstantConditions
-                if (!skipDbCheck && previous < upgradeDbVersion) {
-                    Timber.i("showStartupScreensAndDialogs() running integrityCheck()");
-                    //#5852 - since we may have a warning about disk space, we don't want to force a check database
-                    //and show a warning before the user knows what is happening.
-                    new MaterialDialog.Builder(this)
-                            .title(R.string.integrity_check_startup_title)
-                            .content(R.string.integrity_check_startup_content)
-                            .positiveText(R.string.check_db)
-                            .negativeText(R.string.close)
-                            .onPositive((materialDialog, dialogAction) -> integrityCheck())
-                            .onNeutral((materialDialog, dialogAction) -> restartActivity())
-                            .onNegative((materialDialog, dialogAction) ->  restartActivity())
-                            .canceledOnTouchOutside(false)
-                            .cancelable(false)
-                            .build()
-                            .show();
+            if (!skipDbCheck && previous < upgradeDbVersion) {
+                Timber.i("showStartupScreensAndDialogs() running integrityCheck()");
+                //#5852 - since we may have a warning about disk space, we don't want to force a check database
+                //and show a warning before the user knows what is happening.
+                new MaterialDialog.Builder(this)
+                        .title(R.string.integrity_check_startup_title)
+                        .content(R.string.integrity_check_startup_content)
+                        .positiveText(R.string.check_db)
+                        .negativeText(R.string.close)
+                        .onPositive((materialDialog, dialogAction) -> integrityCheck())
+                        .onNeutral((materialDialog, dialogAction) -> restartActivity())
+                        .onNegative((materialDialog, dialogAction) ->  restartActivity())
+                        .canceledOnTouchOutside(false)
+                        .cancelable(false)
+                        .build()
+                        .show();
+                return;
+            }
+            if (upgradedPreferences) {
+                Timber.i("Updated preferences with no integrity check - restarting activity");
+                // If integrityCheck() doesn't occur, but we did update preferences we should restart DeckPicker to
+                // proceed
+                restartActivity();
+                return;
+            }
 
-                } else if (previous < upgradePrefsVersion) {
-                    Timber.i("Updated preferences with no integrity check - restarting activity");
-                    // If integrityCheck() doesn't occur, but we did update preferences we should restart DeckPicker to
-                    // proceed
-                    restartActivity();
+            // If no changes are required we go to the new features activity
+            // There the "lastVersion" is set, so that this code is not reached again
+            if (VersionUtils.isReleaseVersion()) {
+                Timber.i("Displaying new features");
+                Intent infoIntent = new Intent(this, Info.class);
+                infoIntent.putExtra(Info.TYPE_EXTRA, Info.TYPE_NEW_VERSION);
+
+                if (skip != 0) {
+                    startActivityForResultWithAnimation(infoIntent, SHOW_INFO_NEW_VERSION,
+                            START);
+                } else {
+                    startActivityForResultWithoutAnimation(infoIntent, SHOW_INFO_NEW_VERSION);
                 }
             } else {
-                // If no changes are required we go to the new features activity
-                // There the "lastVersion" is set, so that this code is not reached again
-                if (VersionUtils.isReleaseVersion()) {
-                    Timber.i("Displaying new features");
-                    Intent infoIntent = new Intent(this, Info.class);
-                    infoIntent.putExtra(Info.TYPE_EXTRA, Info.TYPE_NEW_VERSION);
-
-                    if (skip != 0) {
-                        startActivityForResultWithAnimation(infoIntent, SHOW_INFO_NEW_VERSION,
-                                START);
-                    } else {
-                        startActivityForResultWithoutAnimation(infoIntent, SHOW_INFO_NEW_VERSION);
-                    }
-                } else {
-                    Timber.i("Dev Build - not showing 'new features'");
-                    // Don't show new features dialog for development builds
-                    preferences.edit().putString("lastVersion", VersionUtils.getPkgVersionName()).apply();
-                    String ver = getResources().getString(R.string.updated_version, VersionUtils.getPkgVersionName());
-                    UIUtils.showSnackbar(this, ver, true, -1, null, findViewById(R.id.root_layout), null);
-                    showStartupScreensAndDialogs(preferences, 2);
-                }
+                Timber.i("Dev Build - not showing 'new features'");
+                // Don't show new features dialog for development builds
+                InitialActivity.setUpgradedToLatestVersion(preferences);
+                String ver = getResources().getString(R.string.updated_version, VersionUtils.getPkgVersionName());
+                UIUtils.showSnackbar(this, ver, true, -1, null, findViewById(R.id.root_layout), null);
+                showStartupScreensAndDialogs(preferences, 2);
             }
         } else {
             // This is the main call when there is nothing special required
@@ -1356,30 +1346,6 @@ public class DeckPicker extends NavigationDrawerActivity implements
         return previous;
     }
 
-    private void upgradePreferences(long previousVersionCode) {
-        SharedPreferences preferences = AnkiDroidApp.getSharedPrefs(getBaseContext());
-        // clear all prefs if super old version to prevent any errors
-        if (previousVersionCode < 20300130) {
-            Timber.i("Old version of Anki - Clearing preferences");
-            preferences.edit().clear().apply();
-        }
-        // when upgrading from before 2.5alpha35
-        if (previousVersionCode < 20500135) {
-            Timber.i("Old version of Anki - Fixing Zoom");
-            // Card zooming behaviour was changed the preferences renamed
-            int oldCardZoom = preferences.getInt("relativeDisplayFontSize", 100);
-            int oldImageZoom = preferences.getInt("relativeImageSize", 100);
-            preferences.edit().putInt("cardZoom", oldCardZoom).apply();
-            preferences.edit().putInt("imageZoom", oldImageZoom).apply();
-            if (!preferences.getBoolean("useBackup", true)) {
-                preferences.edit().putInt("backupMax", 0).apply();
-            }
-            preferences.edit().remove("useBackup").apply();
-            preferences.edit().remove("intentAdditionInstantAdd").apply();
-        }
-
-        FullScreenMode.upgradeFromLegacyPreference(preferences);
-    }
 
     private UndoTaskListener undoTaskListener(boolean isReview) {
         return new UndoTaskListener(isReview, this);
@@ -2220,8 +2186,9 @@ public class DeckPicker extends NavigationDrawerActivity implements
     }
 
 
-    public void addSharedDeck() {
-        openUrl(Uri.parse(getResources().getString(R.string.shared_decks_url)));
+    public void openAnkiWebSharedDecks() {
+        Intent intent = new Intent(this, SharedDecksActivity.class);
+        startActivityWithoutAnimation(intent);
     }
 
 
@@ -2959,6 +2926,14 @@ public class DeckPicker extends NavigationDrawerActivity implements
         public void onProgressUpdate(String message) {
             mProgressDialog.setContent(message);
         }
+    }
+
+
+    /**
+     * Check if at least one deck is being displayed.
+     */
+    public boolean hasAtLeastOneDeckBeingDisplayed() {
+        return mDeckListAdapter.getItemCount() > 0 && mRecyclerViewLayoutManager.getChildAt(0) != null;
     }
 
     private enum DeckSelectionType {

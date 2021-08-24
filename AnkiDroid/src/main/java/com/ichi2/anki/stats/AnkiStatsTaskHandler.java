@@ -17,7 +17,6 @@ package com.ichi2.anki.stats;
 
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.util.Pair;
 import android.view.View;
 import android.webkit.WebView;
@@ -70,16 +69,21 @@ public class AnkiStatsTaskHandler {
         return sInstance;
     }
 
+    @SuppressWarnings("deprecation") // #7108: AsyncTask
     public CreateChartTask createChart(Stats.ChartType chartType, View... views){
         CreateChartTask createChartTask = new CreateChartTask(chartType, mCollectionData, mStatType, mDeckId);
         createChartTask.execute(views);
         return createChartTask;
     }
+
+    @SuppressWarnings("deprecation") // #7108: AsyncTask
     public CreateStatisticsOverview createStatisticsOverview(View... views){
         CreateStatisticsOverview createChartTask = new CreateStatisticsOverview(mCollectionData, mStatType, mDeckId);
         createChartTask.execute(views);
         return createChartTask;
     }
+
+    @SuppressWarnings("deprecation") // #7108: AsyncTask
     public static DeckPreviewStatistics createReviewSummaryStatistics(Collection col, TextView view){
         DeckPreviewStatistics deckPreviewStatistics = new DeckPreviewStatistics();
         deckPreviewStatistics.execute(new Pair<>(col, view));
@@ -130,11 +134,13 @@ public class AnkiStatsTaskHandler {
             }
         }
 
+        @SuppressWarnings("deprecation") // #7108: AsyncTask
         @Override
         protected void onCancelled() {
             mIsRunning = false;
         }
 
+        @SuppressWarnings("deprecation") // #7108: AsyncTask
         @Override
         protected void onPostExecute(PlotSheet plotSheet) {
             ChartView imageView = mImageView.get();
@@ -191,11 +197,13 @@ public class AnkiStatsTaskHandler {
             }
         }
 
+        @SuppressWarnings("deprecation") // #7108: AsyncTask
         @Override
         protected void onCancelled() {
             mIsRunning = false;
         }
 
+        @SuppressWarnings("deprecation") // #7108: AsyncTask
         @Override
         protected void onPostExecute(String html) {
             WebView webView = mWebView.get();
@@ -216,8 +224,8 @@ public class AnkiStatsTaskHandler {
         }
     }
 
-
-    private static class DeckPreviewStatistics extends AsyncTask<Pair<Collection, TextView>, Void, String> {
+    @SuppressWarnings("deprecation") // #7108: AsyncTask
+    private static class DeckPreviewStatistics extends android.os.AsyncTask<Pair<Collection, TextView>, Void, String> {
         private WeakReference<TextView> mTextView;
 
         private boolean mIsRunning = true;

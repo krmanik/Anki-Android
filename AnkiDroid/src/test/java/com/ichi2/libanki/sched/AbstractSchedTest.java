@@ -26,7 +26,7 @@ import com.ichi2.libanki.Deck;
 import com.ichi2.libanki.DeckConfig;
 import com.ichi2.libanki.Decks;
 import com.ichi2.libanki.Model;
-import com.ichi2.libanki.Models;
+import com.ichi2.libanki.ModelManager;
 import com.ichi2.libanki.Note;
 import com.ichi2.libanki.utils.Time;
 import com.ichi2.testutils.AnkiAssert;
@@ -164,7 +164,7 @@ public class AbstractSchedTest extends RobolectricTest {
         // #6903
         Collection col = getCol();
         AbstractSched sched = col.getSched();
-        Models models = col.getModels();
+        ModelManager models = col.getModels();
         DeckConfig dconf = col.getDecks().getConf(1);
         dconf.getJSONObject("new").put("bury", true);
         final int nbNote = 2;
@@ -248,7 +248,7 @@ public class AbstractSchedTest extends RobolectricTest {
 
         public void test() {
             Collection col = getCol();
-            Models models = col.getModels();
+            ModelManager models = col.getModels();
 
             DeckConfig dconf = decks.getConf(1);
             dconf.getJSONObject("new").put("perDay", 0);
@@ -313,7 +313,7 @@ mw.col.sched.extendLimits(1, 0)
         Collection col = getCol();
         DeckConfig conf = col.getDecks().confForDid(1);
         conf.getJSONObject("new").put("delays", new JSONArray(new double[] {1, 3, 5, 10}));
-        col.getConf().put("collapseTime", 20 * 60);
+        col.set_config("collapseTime", 20 * 60);
         AbstractSched sched = col.getSched();
 
         Note note = addNoteUsingBasicModel("foo", "bar");

@@ -398,6 +398,7 @@ public abstract class AbstractFlashcardViewer extends NavigationDrawerActivity i
     // LISTENERS
     // ----------------------------------------------------------------------------
 
+    @SuppressWarnings("deprecation") //  #7111: new Handler()
     private final Handler mLongClickHandler = new Handler();
     private final Runnable mLongClickTestRunnable = new Runnable() {
         @Override
@@ -911,6 +912,7 @@ public abstract class AbstractFlashcardViewer extends NavigationDrawerActivity i
         }
     }
 
+    @SuppressWarnings("deprecation") //  #7111: new Handler()
     private final Handler mTimerHandler = new Handler();
 
     private final Runnable mRemoveChosenAnswerText = new Runnable() {
@@ -1703,6 +1705,12 @@ public abstract class AbstractFlashcardViewer extends NavigationDrawerActivity i
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebChromeClient(new AnkiDroidWebChromeClient());
+
+        // This setting toggles file system access within WebView
+        // The default configuration is already true in apps targeting API <= 29
+        // Hence, this setting is only useful for apps targeting API >= 30
+        webView.getSettings().setAllowFileAccess(true);
+
         // Problems with focus and input tags is the reason we keep the old type answer mechanism for old Androids.
         webView.setFocusableInTouchMode(mUseInputTag);
         webView.setScrollbarFadingEnabled(true);
@@ -1955,7 +1963,7 @@ public abstract class AbstractFlashcardViewer extends NavigationDrawerActivity i
 
         // These are preferences we pull out of the collection instead of SharedPreferences
         try {
-            mShowNextReviewTime = getCol().getConf().getBoolean("estTimes");
+            mShowNextReviewTime = getCol().get_config_boolean("estTimes");
 
             // Dynamic don't have review options; attempt to get deck-specific auto-advance options
             // but be prepared to go with all default if it's a dynamic deck
@@ -2039,6 +2047,7 @@ public abstract class AbstractFlashcardViewer extends NavigationDrawerActivity i
      * Handler for the delay in auto showing question and/or answer One toggle for both question and answer, could set
      * longer delay for auto next question
      */
+    @SuppressWarnings("deprecation") //  #7111: new Handler()
     protected final Handler mTimeoutHandler = new Handler();
 
     protected final Runnable mShowQuestionTask = new Runnable() {
@@ -2799,6 +2808,15 @@ public abstract class AbstractFlashcardViewer extends NavigationDrawerActivity i
             case COMMAND_TOGGLE_FLAG_BLUE:
                 toggleFlag(FLAG_BLUE);
                 return true;
+            case COMMAND_TOGGLE_FLAG_PINK:
+                toggleFlag(FLAG_PINK);
+                return true;
+            case COMMAND_TOGGLE_FLAG_TURQUOISE:
+                toggleFlag(FLAG_TURQUOISE);
+                return true;
+            case COMMAND_TOGGLE_FLAG_PURPLE:
+                toggleFlag(FLAG_PURPLE);
+                return true;
             case COMMAND_UNSET_FLAG:
                 onFlag(mCurrentCard, FLAG_NONE);
                 return true;
@@ -3076,6 +3094,7 @@ public abstract class AbstractFlashcardViewer extends NavigationDrawerActivity i
             return null;
         }
 
+        @SuppressWarnings("deprecation") //  #7111: new Handler()
         private final Handler mScrollHandler = new Handler();
         private final Runnable mScrollXRunnable = () -> mIsXScrolling = false;
         private final Runnable mScrollYRunnable = () -> mIsYScrolling = false;
@@ -4175,6 +4194,42 @@ see card.js for available functions
         @JavascriptInterface
         public String ankiGetDeckName() {
             return Decks.basename(getCol().getDecks().get(mCurrentCard.getDid()).getString("name"));
+        }
+
+        @JavascriptInterface
+        public boolean ankiBuryCard() {
+            return buryCard();
+        }
+
+        @JavascriptInterface
+        public boolean ankiBuryNote() {
+            return buryNote();
+        }
+
+        @JavascriptInterface
+        public boolean ankiSuspendCard() {
+            return suspendCard();
+        }
+
+        @JavascriptInterface
+        public boolean ankiSuspendNote() {
+            return suspendNote();
+        }
+
+        @JavascriptInterface
+        public void ankiAddTagToCard() {
+            runOnUiThread(() -> showTagsDialog());
+        }
+
+        @JavascriptInterface
+        public void ankiSearchCard(String query) {
+            Intent intent = new Intent(AbstractFlashcardViewer.this, CardBrowser.class);
+            Long currentCardId = getCurrentCardId();
+            if (currentCardId != null) {
+                intent.putExtra("currentCard", currentCardId);
+            }
+            intent.putExtra("search_query", query);
+            startActivityForResultWithAnimation(intent, REQUEST_BROWSE_CARDS, START);
         }
 
         @JavascriptInterface

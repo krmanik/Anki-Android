@@ -131,6 +131,8 @@ public class Reviewer extends AbstractFlashcardViewer {
 
     @VisibleForTesting
     protected final PeripheralKeymap mProcessor = new PeripheralKeymap(this, this);
+    
+    private final Onboarding.Reviewer mOnboarding = new Onboarding.Reviewer(this);
 
     /** We need to listen for and handle reschedules / resets very similarly */
     class ScheduleCollectionTaskListener extends NextCardHandler<Computation<Card[]>> {
@@ -366,7 +368,7 @@ public class Reviewer extends AbstractFlashcardViewer {
             Timber.i("Reviewer:: Save whiteboard button pressed");
             if (mWhiteboard != null) {
                 try {
-                    String savedWhiteboardFileName = mWhiteboard.saveWhiteboard(getCol().getTime());
+                    String savedWhiteboardFileName = mWhiteboard.saveWhiteboard(getCol().getTime()).getPath();
                     UIUtils.showThemedToast(Reviewer.this, getString(R.string.white_board_image_saved, savedWhiteboardFileName), true);
                 } catch (Exception e) {
                     Timber.w(e);
@@ -411,6 +413,15 @@ public class Reviewer extends AbstractFlashcardViewer {
         } else if (itemId == R.id.action_flag_four) {
             Timber.i("Reviewer:: Flag four");
             onFlag(mCurrentCard, FLAG_BLUE);
+        } else if (itemId == R.id.action_flag_five) {
+            Timber.i("Reviewer:: Flag five");
+            onFlag(mCurrentCard, FLAG_PINK);
+        } else if (itemId == R.id.action_flag_six) {
+            Timber.i("Reviewer:: Flag six");
+            onFlag(mCurrentCard, FLAG_TURQUOISE);
+        } else if (itemId == R.id.action_flag_seven) {
+            Timber.i("Reviewer:: Flag seven");
+            onFlag(mCurrentCard, FLAG_PURPLE);
         } else if (itemId == R.id.action_card_info) {
             Timber.i("Card Viewer:: Card Info");
             openCardInfo();
@@ -553,6 +564,7 @@ public class Reviewer extends AbstractFlashcardViewer {
     }
 
     @Override
+    @SuppressWarnings("deprecation") //  #7111: new Handler()
     public boolean onMenuOpened(int featureId, Menu menu) {
         new Handler().post(() -> {
             for (int i = 0; i < menu.size(); i++) {
@@ -577,6 +589,7 @@ public class Reviewer extends AbstractFlashcardViewer {
 
 
     @Override
+    @SuppressWarnings("deprecation") //  #7111: new Handler()
     public void onPanelClosed(int featureId, @NonNull Menu menu) {
         new Handler().postDelayed(this::refreshActionBar, 100);
     }
@@ -616,6 +629,15 @@ public class Reviewer extends AbstractFlashcardViewer {
                     case 4:
                         flag_icon.setIcon(R.drawable.ic_flag_blue);
                         break;
+                    case 5:
+                        flag_icon.setIcon(R.drawable.ic_flag_pink);
+                        break;
+                    case 6:
+                        flag_icon.setIcon(R.drawable.ic_flag_turquoise);
+                        break;
+                    case 7:
+                        flag_icon.setIcon(R.drawable.ic_flag_purple);
+                        break;
                     default:
                         flag_icon.setIcon(R.drawable.ic_flag_transparent);
                         break;
@@ -644,6 +666,10 @@ public class Reviewer extends AbstractFlashcardViewer {
         undoIcon.getActionView().setEnabled(undoEnabled);
         if (colIsOpen()) { // Required mostly because there are tests where `col` is null
             undoIcon.setTitle(getResources().getString(R.string.studyoptions_congrats_undo, getCol().undoName(getResources())));
+        }
+
+        if (undoEnabled) {
+            mOnboarding.onUndoButtonEnabled();
         }
 
         MenuItem toggle_whiteboard_icon = menu.findItem(R.id.action_toggle_whiteboard);
@@ -723,6 +749,7 @@ public class Reviewer extends AbstractFlashcardViewer {
         suspend_icon.getIcon().mutate().setAlpha(alpha);
 
         setupSubMenu(menu, R.id.action_schedule, new ScheduleProvider(this));
+        mOnboarding.onCreate();
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -772,7 +799,10 @@ public class Reviewer extends AbstractFlashcardViewer {
 
 
     private boolean isFlagResource(int itemId) {
-        return itemId == R.id.action_flag_four
+        return itemId == R.id.action_flag_seven
+                || itemId == R.id.action_flag_six
+                || itemId == R.id.action_flag_five
+                || itemId == R.id.action_flag_four
                 || itemId == R.id.action_flag_three
                 || itemId == R.id.action_flag_two
                 || itemId == R.id.action_flag_one;
@@ -860,6 +890,7 @@ public class Reviewer extends AbstractFlashcardViewer {
     @Override
     protected void displayAnswerBottomBar() {
         super.displayAnswerBottomBar();
+        mOnboarding.onAnswerShown();
         int buttonCount;
         try {
             buttonCount = mSched.answerButtons(mCurrentCard);
@@ -1085,7 +1116,7 @@ public class Reviewer extends AbstractFlashcardViewer {
 
     protected void restoreCollectionPreferences() {
         super.restoreCollectionPreferences();
-        mShowRemainingCardCount = getCol().getConf().getBoolean("dueCounts");
+        mShowRemainingCardCount = getCol().get_config_boolean("dueCounts");
     }
 
     @Override
@@ -1104,7 +1135,7 @@ public class Reviewer extends AbstractFlashcardViewer {
         }
     }
 
-
+    @SuppressWarnings("deprecation") //  #7111: new Handler()
     protected final Handler mFullScreenHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -1130,7 +1161,7 @@ public class Reviewer extends AbstractFlashcardViewer {
         }
     }
 
-
+    @SuppressWarnings("deprecation") // #9332: UI Visibility -> Insets
     private void setFullScreen(final AbstractFlashcardViewer a) {
         // Set appropriate flags to enable Sticky Immersive mode.
         a.getWindow().getDecorView().setSystemUiVisibility(
@@ -1197,6 +1228,7 @@ public class Reviewer extends AbstractFlashcardViewer {
                 });
     }
 
+    @SuppressWarnings("deprecation") // #9332: UI Visibility -> Insets
     private boolean isImmersiveSystemUiVisible(AnkiActivity activity) {
         return (activity.getWindow().getDecorView().getSystemUiVisibility() & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
     }

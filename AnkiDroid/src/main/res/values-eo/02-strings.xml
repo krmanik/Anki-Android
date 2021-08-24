@@ -350,4 +350,18 @@
     <string name="password_empty">Pasvorto estas postulata</string>
     <string name="back_pressed_once">Frapetu denove por eliri</string>
     <string name="back_pressed_once_reviewer">Frapetu denove por reiri</string>
+    <!-- %% is required to display % symbol. Reference: https://stackoverflow.com/a/16834358 -->
+    <string name="percentage">%s%%</string>
+    <string name="download_deck">Elŝuti kartaron</string>
+    <string name="try_again">Reprovi</string>
+    <string name="cancel_download">Rezigni elŝuton</string>
+    <string name="cancel_download_question_title">Ĉu rezigni elŝuton?</string>
+    <string name="downloading_file">Elŝutado de %s</string>
+    <string name="import_deck">Enporti kartaron</string>
+    <string name="something_wrong">Problemo okazis, reprovu</string>
+    <string name="download_failed">Elŝuto malsukcesis</string>
+    <string name="deck_download_progress_message">Vi povas uzi aliajn aplikaĵojn kiam la dosiero(j) estas elŝutata(j)</string>
+    <string name="check_network">Kontrolu vian retkonekton</string>
+    <string name="search_using_deck_name">Serĉi laŭ nomo de kartaro</string>
+    <string name="home">Hejmo</string>
 </resources>

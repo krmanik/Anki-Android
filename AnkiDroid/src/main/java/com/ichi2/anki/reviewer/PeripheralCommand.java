@@ -67,6 +67,10 @@ public class PeripheralCommand {
         return mBinding;
     }
 
+    public CardSide getSide() {
+        return mCardSide;
+    }
+
     public boolean isQuestion() {
         return mCardSide == CardSide.QUESTION || mCardSide == CardSide.BOTH;
     }
@@ -133,11 +137,17 @@ public class PeripheralCommand {
         ret.add(keyCode(KeyEvent.KEYCODE_2, COMMAND_TOGGLE_FLAG_ORANGE, CardSide.BOTH, ModifierKeys.ctrl()));
         ret.add(keyCode(KeyEvent.KEYCODE_3, COMMAND_TOGGLE_FLAG_GREEN, CardSide.BOTH, ModifierKeys.ctrl()));
         ret.add(keyCode(KeyEvent.KEYCODE_4, COMMAND_TOGGLE_FLAG_BLUE, CardSide.BOTH, ModifierKeys.ctrl()));
+        ret.add(keyCode(KeyEvent.KEYCODE_5, COMMAND_TOGGLE_FLAG_PINK, CardSide.BOTH, ModifierKeys.ctrl()));
+        ret.add(keyCode(KeyEvent.KEYCODE_6, COMMAND_TOGGLE_FLAG_TURQUOISE, CardSide.BOTH, ModifierKeys.ctrl()));
+        ret.add(keyCode(KeyEvent.KEYCODE_7, COMMAND_TOGGLE_FLAG_PURPLE, CardSide.BOTH, ModifierKeys.ctrl()));
 
         ret.add(keyCode(KeyEvent.KEYCODE_NUMPAD_1, COMMAND_TOGGLE_FLAG_RED, CardSide.BOTH, ModifierKeys.ctrl()));
         ret.add(keyCode(KeyEvent.KEYCODE_NUMPAD_2, COMMAND_TOGGLE_FLAG_ORANGE, CardSide.BOTH, ModifierKeys.ctrl()));
         ret.add(keyCode(KeyEvent.KEYCODE_NUMPAD_3, COMMAND_TOGGLE_FLAG_GREEN, CardSide.BOTH, ModifierKeys.ctrl()));
         ret.add(keyCode(KeyEvent.KEYCODE_NUMPAD_4, COMMAND_TOGGLE_FLAG_BLUE, CardSide.BOTH, ModifierKeys.ctrl()));
+        ret.add(keyCode(KeyEvent.KEYCODE_NUMPAD_5, COMMAND_TOGGLE_FLAG_PINK, CardSide.BOTH, ModifierKeys.ctrl()));
+        ret.add(keyCode(KeyEvent.KEYCODE_NUMPAD_6, COMMAND_TOGGLE_FLAG_TURQUOISE, CardSide.BOTH, ModifierKeys.ctrl()));
+        ret.add(keyCode(KeyEvent.KEYCODE_NUMPAD_7, COMMAND_TOGGLE_FLAG_PURPLE, CardSide.BOTH, ModifierKeys.ctrl()));
 
         return ret;
     }
@@ -145,13 +155,5 @@ public class PeripheralCommand {
 
     public boolean matchesModifier(KeyEvent event) {
         return mBinding.matchesModifier(event);
-    }
-
-
-    private enum CardSide {
-        NONE,
-        QUESTION,
-        ANSWER,
-        BOTH
     }
 }

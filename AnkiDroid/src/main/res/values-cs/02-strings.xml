@@ -74,7 +74,7 @@
     <string name="webview_crash_nonfatal">Vykreslování WebView selhalo. Příčina: %s</string>
     <string name="webview_crash_fatal">Kritická chyba: Vykreslování WebView selhalo. Příčina: %s</string>
     <string name="webview_crash_loop_dialog_title">Selhání vykreslování systémového webView</string>
-    <string name="webview_crash_loop_dialog_content">Systémovému WebView se nepodařilo vykreslit kartu \'%1$s\'.\n %2$s</string>
+    <string name="webview_crash_loop_dialog_content">Systémovému WebView se nepodařilo vykreslit kartu „%1$s“.\n %2$s</string>
     <!-- Browser -->
     <string-array name="browser_column1_headings">
         <item>Otázka</item>
@@ -376,4 +376,18 @@
     <string name="password_empty">Je požadováno heslo</string>
     <string name="back_pressed_once">Pro ukončení stiskněte znovu tlačítko zpět</string>
     <string name="back_pressed_once_reviewer">Pro návrat stiskněte znovu tlačítko zpět</string>
+    <!-- %% is required to display % symbol. Reference: https://stackoverflow.com/a/16834358 -->
+    <string name="percentage">%s%%</string>
+    <string name="download_deck">Stáhnout balíček</string>
+    <string name="try_again">Zkusit znovu</string>
+    <string name="cancel_download">Zrušit stahování</string>
+    <string name="cancel_download_question_title">Zrušit stahování?</string>
+    <string name="downloading_file">Stahuje se %s</string>
+    <string name="import_deck">Importovat balíček</string>
+    <string name="something_wrong">Něco se pokazilo, zkuste to prosím znovu</string>
+    <string name="download_failed">Stahování se nezdařilo</string>
+    <string name="deck_download_progress_message">Během stahování můžete používat jiné aplikace</string>
+    <string name="check_network">Zkontrolujte prosím připojení k síti</string>
+    <string name="search_using_deck_name">Search using deck name</string>
+    <string name="home">Home</string>
 </resources>

@@ -124,6 +124,9 @@
     <string name="menu_flag_card_two">Аранжавы сцяжок</string>
     <string name="menu_flag_card_three">Зялёны сцяжок</string>
     <string name="menu_flag_card_four">Блакітны сцяжок</string>
+    <string name="menu_flag_card_five">Ружовы сцяжок</string>
+    <string name="menu_flag_card_six">Туркусовы сцяжок</string>
+    <string name="menu_flag_card_seven">Фіялетавы сцяжок</string>
     <string name="menu_edit_tags">Змяніць меткі</string>
     <string name="delete_note_message">Сапраўды выдаліць гэты запіс і ўсе яе карткі?\n%s</string>
     <string name="menu_select">Выбраць тэкст</string>
@@ -197,6 +200,12 @@
     <string name="card_template_editor_insert_field">Уставіць поле</string>
     <string name="card_template_editor_select_field">Абраць поле</string>
     <string name="card_template_editor_cant_delete">Патрабуецца прынамсі адзін тып картак</string>
+    <plurals name="card_template_editor_confirm_add">
+        <item quantity="one">Будзе створана %1$d картка. Працягнуць?</item>
+        <item quantity="few">Будзе створана %1$d карткі. Працягнуць?</item>
+        <item quantity="many">Будзе створана %1$d картак. Працягнуць?</item>
+        <item quantity="other">Будзе створана %1$d карткі. Працягнуць?</item>
+    </plurals>
     <plurals name="card_template_editor_confirm_delete">
         <item quantity="one">Выдаліць тып карткі \'%2$s\' і %1$d яе картку?</item>
         <item quantity="few">Выдаліць тып карткі \'%2$s\' і %1$d яе карткі?</item>
@@ -240,4 +249,5 @@
         <item quantity="many">%1$d картак (0 для паўтору)</item>
         <item quantity="other">%1$d карткі (0 для паўтору)</item>
     </plurals>
+    <string name="copy_note_type_name" comment="The new name of a copied note type">%s copy</string>
 </resources>

@@ -39,6 +39,7 @@ import com.ichi2.anki.NoteEditor;
 import com.ichi2.anki.Preferences;
 import com.ichi2.anki.Previewer;
 import com.ichi2.anki.Reviewer;
+import com.ichi2.anki.SharedDecksActivity;
 import com.ichi2.anki.Statistics;
 import com.ichi2.anki.StudyOptionsActivity;
 import com.ichi2.anki.VideoPlayer;
@@ -94,6 +95,7 @@ public class ActivityList {
                 get(CardInfo.class),
                 get(CardTemplateEditor.class, ActivityList::intentForCardTemplateEditor),
                 get(CardTemplateBrowserAppearanceEditor.class, ActivityList::intentForCardTemplateBrowserAppearanceEditor),
+                get(SharedDecksActivity.class),
                 get(AddonBrowser.class)
         );
     }

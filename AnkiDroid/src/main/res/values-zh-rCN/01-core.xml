@@ -65,7 +65,7 @@
         <item quantity="other">剩余 %d 小时 %d</item>
     </plurals>
     <plurals name="reviewer_window_title_days">
-        <item quantity="other">剩余 %d 天 %d</item>
+        <item quantity="other">还剩%d天</item>
     </plurals>
     <string name="no_cards_placeholder_title">收藏为空</string>
     <string name="no_cards_placeholder_description">开始添加卡牌\n使用 + 图标。</string>
@@ -102,13 +102,16 @@
     <string name="menu_bury">搁置</string>
     <string name="menu_suspend">暂停</string>
     <string name="menu_delete_note">删除笔记</string>
-    <string name="menu_flag">标志</string>
-    <string name="menu_flag_card">标志卡</string>
-    <string name="menu_flag_card_zero">无标志</string>
-    <string name="menu_flag_card_one">红色标志</string>
-    <string name="menu_flag_card_two">橙色标志</string>
-    <string name="menu_flag_card_three">绿色标志</string>
-    <string name="menu_flag_card_four">蓝色标志</string>
+    <string name="menu_flag">旗标</string>
+    <string name="menu_flag_card">为卡片设置旗标</string>
+    <string name="menu_flag_card_zero">无旗标</string>
+    <string name="menu_flag_card_one">红色旗标</string>
+    <string name="menu_flag_card_two">橙色旗标</string>
+    <string name="menu_flag_card_three">绿色旗标</string>
+    <string name="menu_flag_card_four">蓝色旗标</string>
+    <string name="menu_flag_card_five">粉色标志</string>
+    <string name="menu_flag_card_six">蓝绿色标志</string>
+    <string name="menu_flag_card_seven">紫色标志</string>
     <string name="menu_edit_tags">编辑标签​​​​​</string>
     <string name="delete_note_message">确定要删除此笔记及生成的卡片？\n%s</string>
     <string name="menu_select">选择文本</string>
@@ -182,6 +185,9 @@
     <string name="card_template_editor_insert_field">插入字段</string>
     <string name="card_template_editor_select_field">选择字段</string>
     <string name="card_template_editor_cant_delete">至少需要保留一个卡片类型。</string>
+    <plurals name="card_template_editor_confirm_add">
+        <item quantity="other">这将创建 %1$d 张卡片。是否继续？</item>
+    </plurals>
     <plurals name="card_template_editor_confirm_delete">
         <item quantity="other">确定删除\"%2$s\"笔记类型类型和它包含的%1$d张卡片吗？</item>
     </plurals>
@@ -219,4 +225,5 @@
     <plurals name="deckpicker_title_zero_due">
         <item quantity="other">%1$d 张卡片 (0到期)</item>
     </plurals>
+    <string name="copy_note_type_name" comment="The new name of a copied note type">%s copy</string>
 </resources>

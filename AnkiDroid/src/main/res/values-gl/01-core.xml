@@ -114,6 +114,9 @@
     <string name="menu_flag_card_two">Tarxeta laranxa</string>
     <string name="menu_flag_card_three">Tarxeta verde</string>
     <string name="menu_flag_card_four">tarxeta azul</string>
+    <string name="menu_flag_card_five">Pink flag</string>
+    <string name="menu_flag_card_six">Turquoise flag</string>
+    <string name="menu_flag_card_seven">Purple flag</string>
     <string name="menu_edit_tags">Edit tags</string>
     <string name="delete_note_message">Tes a certeza de querer eliminar esta nota e todos os seus cartóns?\n%s</string>
     <string name="menu_select">Seleccionar texto</string>
@@ -187,6 +190,10 @@
     <string name="card_template_editor_insert_field">Insert field</string>
     <string name="card_template_editor_select_field">Select field</string>
     <string name="card_template_editor_cant_delete">Cando menos un tipo de cartón é obrigatorio.</string>
+    <plurals name="card_template_editor_confirm_add">
+        <item quantity="one">This will create %1$d card. Proceed?</item>
+        <item quantity="other">This will create %1$d cards. Proceed?</item>
+    </plurals>
     <plurals name="card_template_editor_confirm_delete">
         <item quantity="one">Eliminar o tipo de cartón “%2$s” e o seu %1$d cartón?</item>
         <item quantity="other">Eliminar o tipo de cartón “%2$s” e os seus %1$d cartóns?</item>
@@ -226,4 +233,5 @@
         <item quantity="one">%1$d card (0 due)</item>
         <item quantity="other">%1$d cards (0 due)</item>
     </plurals>
+    <string name="copy_note_type_name" comment="The new name of a copied note type">%s copy</string>
 </resources>

@@ -107,11 +107,14 @@
     <string name="gesture_flag_orange">Växla Orange Flagga</string>
     <string name="gesture_flag_green">Växla grön flagga</string>
     <string name="gesture_flag_blue">Växla blå flagga</string>
+    <string name="gesture_flag_pink">Toggle Pink Flag</string>
+    <string name="gesture_flag_turquoise">Toggle Turquoise Flag</string>
+    <string name="gesture_flag_purple">Toggle Purple Flag</string>
     <string name="gesture_flag_remove">Ta bort flagga</string>
     <string name="gesture_page_up">Sida upp</string>
     <string name="gesture_page_down">Sida ner</string>
     <string name="gesture_abort_sync">Avbryt inlärning och synkronisera</string>
     <string name="gesture_toggle_whiteboard">Växla whiteboard</string>
     <string name="record_voice">Spela in röst</string>
-    <string name="replay_voice">Replay Voice</string>
+    <string name="replay_voice">Återuppspela röst</string>
 </resources>

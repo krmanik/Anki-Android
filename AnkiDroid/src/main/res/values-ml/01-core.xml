@@ -114,6 +114,9 @@
     <string name="menu_flag_card_two">ഓറഞ്ച് ഫ്ലാഗ്</string>
     <string name="menu_flag_card_three">പച്ച ഫ്ലാഗ്</string>
     <string name="menu_flag_card_four">നീല ഫ്ലാഗ്</string>
+    <string name="menu_flag_card_five">Pink flag</string>
+    <string name="menu_flag_card_six">Turquoise flag</string>
+    <string name="menu_flag_card_seven">Purple flag</string>
     <string name="menu_edit_tags">ടാഗുകൾ എഡിറ്റുചെയ്യുക</string>
     <string name="delete_note_message">ഈ കുറിപ്പും അതിന്റെ എല്ലാ കാർഡുകളും ശരിക്കും ഇല്ലാതാക്കുക?\n%s</string>
     <string name="menu_select">വാചകം തിരഞ്ഞെടുക്കുക</string>
@@ -187,6 +190,10 @@
     <string name="card_template_editor_insert_field">Insert field</string>
     <string name="card_template_editor_select_field">Select field</string>
     <string name="card_template_editor_cant_delete">കുറഞ്ഞത് ഒരു കാർഡ് തരമെങ്കിലും ആവശ്യമാണ്</string>
+    <plurals name="card_template_editor_confirm_add">
+        <item quantity="one">This will create %1$d card. Proceed?</item>
+        <item quantity="other">This will create %1$d cards. Proceed?</item>
+    </plurals>
     <plurals name="card_template_editor_confirm_delete">
         <item quantity="one">“%2$s” കാർഡ് തരവും അതിന്റെ %1$d കാർഡും ഇല്ലാതാക്കണോ?</item>
         <item quantity="other">“%2$s” കാർഡ് തരവും അതിന്റെ %1$d കാർഡുകളും ഇല്ലാതാക്കണോ?</item>
@@ -226,4 +233,5 @@
         <item quantity="one">%1$d card (0 due)</item>
         <item quantity="other">%1$d cards (0 due)</item>
     </plurals>
+    <string name="copy_note_type_name" comment="The new name of a copied note type">%s copy</string>
 </resources>
