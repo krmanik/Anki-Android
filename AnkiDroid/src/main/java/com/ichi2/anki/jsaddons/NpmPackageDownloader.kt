@@ -16,10 +16,18 @@
  */
 package com.ichi2.anki.jsaddons
 
+import android.app.Activity
+import android.app.Dialog
 import android.content.Context
+import android.net.Uri
+import android.view.View
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.CollectionHelper
 import com.ichi2.anki.R
 import com.ichi2.anki.UIUtils
@@ -27,6 +35,7 @@ import com.ichi2.anki.web.HttpFetcher
 import com.ichi2.async.ProgressSenderAndCancelListener
 import com.ichi2.async.TaskDelegate
 import com.ichi2.async.TaskListener
+import com.ichi2.async.TaskManager
 import com.ichi2.libanki.Collection
 import org.apache.commons.compress.archivers.ArchiveException
 import timber.log.Timber
@@ -36,12 +45,16 @@ import java.net.URL
 import java.net.UnknownHostException
 
 class NpmPackageDownloader {
-
-    class DownloadAddon(private val mContext: Context, private val mNpmPackageName: String) : TaskDelegate<Void?, String?>() {
+    /**
+     * Show/hide download button in webview
+     * for valid addon npm package - show button
+     * for invalid addon npm package - hide button
+     */
+    class ShowHideInstallButton(private val mContext: Context, private val mNpmPackageName: String) : TaskDelegate<Void?, String?>() {
 
         override fun task(col: Collection, collectionTask: ProgressSenderAndCancelListener<Void?>): String? {
             val url = URL(mContext.getString(R.string.npmjs_registry, mNpmPackageName))
-            return download(url)
+            return getTarBallUrl(url)
         }
 
         /**
@@ -50,8 +63,11 @@ class NpmPackageDownloader {
          * then downloads and extract to AnkiDroid/addons folder using {@code extractAndCopyAddonTgz} and toast with success message returned
          *
          * For invalid addon or for exception occurred, it returns message to respective to the errors from catch block
+         *
+         * @param url npmjs.org package registry url http://registry.npmjs.org/ankidroid-js-addon-.../latest
+         * @return tarballUrl if valid addon else message explaining errors
          */
-        fun download(url: URL): String? {
+        fun getTarBallUrl(url: URL): String? {
             try {
                 // mapping for json fetched from http://registry.npmjs.org/ankidroid-js-addon-.../latest
                 val mapper = ObjectMapper()
@@ -65,19 +81,7 @@ class NpmPackageDownloader {
 
                 // get tarball url to download it cache folder
                 val tarballUrl = addonModel.dist!!["tarball"]
-
-                // download the .tgz file in cache folder of AnkiDroid
-                val downloadFilePath = HttpFetcher.downloadFileToSdCardMethod(tarballUrl, mContext, "addons", "GET")
-                Timber.d("download path %s", downloadFilePath)
-
-                // extract the .tgz file to AnkiDroid/addons dir
-                val extracted = extractAndCopyAddonTgz(downloadFilePath, mNpmPackageName)
-
-                if (!extracted) {
-                    return mContext.getString(R.string.failed_to_extract_addon_package, addonModel.addonTitle)
-                } else {
-                    return mContext.getString(R.string.addon_installed, addonModel.addonTitle)
-                }
+                return tarballUrl
 
                 // addonTitle sent to list the addons in recycler view
             } catch (e: JacksonException) {
@@ -96,6 +100,100 @@ class NpmPackageDownloader {
             } catch (e: IOException) {
                 Timber.w(e.localizedMessage)
                 return mContext.getString(R.string.error_occur_downloading_addon, mNpmPackageName)
+            }
+        }
+    }
+
+    /**
+     * Show/hide download button in webview listener
+     *
+     * in onPostExecute after page loaded result is tarballUrl, show hidden button and set OnClickListener for calling another Task which download and extract .tgz file
+     */
+    class ShowHideInstallButtonListener(private val mActivity: Activity, private val mDownloadButton: Button, private val addonName: String) : TaskListener<Void?, String?>() {
+        var mContext: Context = mActivity.applicationContext
+        override fun onPreExecute() {
+            // nothing to do
+        }
+
+        override fun onPostExecute(result: String?) {
+            mDownloadButton.setOnClickListener {
+                val dialog = Dialog(mActivity)
+                dialog.setCancelable(false)
+                dialog.setContentView(R.layout.addon_progress_bar_layout)
+                val title = dialog.findViewById(R.id.progress_bar_layout_title) as TextView
+                val msg = dialog.findViewById(R.id.progress_bar_layout_message) as TextView
+                val progress = dialog.findViewById(R.id.progress_bar) as ProgressBar
+                val cancelButton = dialog.findViewById(R.id.cancel_action) as Button
+                title.text = mContext.getString(R.string.downloading_npm_package)
+                msg.text = addonName
+
+                // call another task which download .tgz file and extract and copy to addons folder
+                // here result is tarBallUrl
+                val cancellable = TaskManager.launchCollectionTask(
+                    DownloadAndExtract(mContext, result!!, addonName),
+                    DownloadAndExtractListener(mActivity, title, msg, progress, cancelButton)
+                )
+
+                cancelButton.setOnClickListener {
+                    cancellable.cancel(true)
+                    dialog.dismiss()
+                }
+
+                dialog.show()
+            }
+
+            // result will .tgz url for valid npm package else message explaining errors
+            if (result != null) {
+                // show download button at bottom right with "Install Addon" when string starts with url
+                // the result return from previous collection task
+                if (result.startsWith("https://")) {
+                    mDownloadButton.visibility = View.VISIBLE
+                } else {
+                    // show snackbar where to seek help and wiki for the errors
+                    val helpUrl = Uri.parse(mContext.getString(R.string.link_help))
+                    val activity = mActivity as AnkiActivity?
+                    UIUtils.showSnackbar(
+                        mActivity,
+                        result,
+                        false,
+                        R.string.help,
+                        { v -> activity?.openUrl(helpUrl) },
+                        null,
+                        null
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Download .tgz file, extract and copy to addons folder
+     */
+    class DownloadAndExtract(private val mContext: Context, private val tarballUrl: String, private val addonName: String) : TaskDelegate<Void?, String?>() {
+
+        override fun task(col: Collection, collectionTask: ProgressSenderAndCancelListener<Void?>): String? {
+            return downloadPackage()
+        }
+
+        /**
+         * Download .tgz file from provided url
+         *
+         * @param tarballUrl .tgz file url
+         * @param addonName name of the npm addon package
+         * @return success message for toast or snackbar
+         */
+        fun downloadPackage(): String {
+            // download the .tgz file in cache folder of AnkiDroid
+            val downloadFilePath = HttpFetcher.downloadFileToSdCardMethod(tarballUrl, mContext, "addons", "GET")
+            Timber.d("download path %s", downloadFilePath)
+
+            // extract the .tgz file to AnkiDroid/addons dir
+            val extracted = extractAndCopyAddonTgz(downloadFilePath, addonName)
+
+            if (!extracted) {
+                return mContext.getString(R.string.failed_to_extract_addon_package, addonName)
+            } else {
+                return mContext.getString(R.string.addon_install_complete, addonName)
             }
         }
 
@@ -137,13 +235,23 @@ class NpmPackageDownloader {
         }
     }
 
-    class DownloadAddonListener(private val mContext: Context) : TaskListener<Void?, String?>() {
+    class DownloadAndExtractListener(
+        private val mActivity: Activity,
+        private var mTitle: TextView,
+        private var msg: TextView,
+        private val progress: ProgressBar,
+        private val cancelButton: Button
+    ) : TaskListener<Void?, String?>() {
+        var mContext: Context = mActivity.applicationContext
         override fun onPreExecute() {
-            UIUtils.showThemedToast(mContext, mContext.getString(R.string.checking_valid_addon), false)
+            mTitle.text = mContext.getString(R.string.extracting_npm_package)
         }
 
         override fun onPostExecute(result: String?) {
-            UIUtils.showThemedToast(mContext, result, false)
+            mTitle.text = mContext.getString(R.string.addon_installed)
+            msg.text = result
+            progress.visibility = View.GONE
+            cancelButton.setText(R.string.dialog_ok)
         }
     }
 }
