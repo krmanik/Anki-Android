@@ -98,6 +98,10 @@ public class ImportUtils {
         return FileImporter.hasExtension(fileName, "apkg") || FileImporter.hasExtension(fileName, "colpkg");
     }
 
+    public static boolean isFileAValidTgz(String fileName) {
+        return FileImporter.hasExtension(fileName, "tgz");
+    }
+
 
     @SuppressWarnings("WeakerAccess")
     protected static class FileImporter {

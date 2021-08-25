@@ -389,6 +389,11 @@
             android:label="@string/download_deck"
             android:theme="@style/Theme.MaterialComponents.NoActionBar" />
         <activity
+            android:name=".jsaddons.AddonDownloadActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|locale"
+            android:label="@string/download_deck"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+        <activity
             android:name="com.ichi2.anki.AddonBrowser"
             android:exported="false"
             android:configChanges="keyboardHidden|orientation|locale|screenSize"
