@@ -18,9 +18,10 @@
 
 package com.ichi2.anki
 
-import android.net.Uri
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import com.ichi2.anki.jsaddons.AddonDownloadActivity
 import com.ichi2.anki.widgets.DeckDropDownAdapter.SubtitleListener
 import timber.log.Timber
 import java.io.File
@@ -65,7 +66,8 @@ class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
         menuInflater.inflate(R.menu.addon_browser, menu)
         val getMoreAddons = menu.findItem(R.id.action_get_more_addons)
         getMoreAddons.setOnMenuItemClickListener {
-            openUrl(Uri.parse(resources.getString(R.string.ankidroid_js_addon_npm_search_url)))
+            val intent = Intent(this, AddonDownloadActivity::class.java)
+            startActivityWithoutAnimation(intent)
             true
         }
         return super.onCreateOptionsMenu(menu)
