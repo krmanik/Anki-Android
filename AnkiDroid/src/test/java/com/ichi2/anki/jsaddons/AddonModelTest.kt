@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ichi2.anki.R
 import com.ichi2.anki.RobolectricTest
-import com.ichi2.anki.jsaddons.Addon.isValidAnkiDroidAddon
 import com.ichi2.anki.jsaddons.NpmUtils.ANKIDROID_JS_ADDON_KEYWORDS
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
@@ -61,7 +60,7 @@ class AddonModelTest : RobolectricTest() {
         val addonModel: AddonModel = mapper.readValue(URL(context.getString(R.string.npmjs_registry, NPM_PACKAGE_NAME)), AddonModel::class.java)
 
         // test addon is valid or not
-        assertTrue(isValidAnkiDroidAddon(addonModel))
+        assertTrue(addonModel.isValidAnkiDroidAddon())
         assertEquals("valid-ankidroid-js-addon-test", addonModel.name)
         assertEquals("Valid AnkiDroid JS Addon", addonModel.addonTitle)
         assertEquals("0.0.1", addonModel.ankidroidJsApi)
@@ -93,6 +92,6 @@ class AddonModelTest : RobolectricTest() {
         val addonModel: AddonModel = mapper.readValue(URL(context.getString(R.string.npmjs_registry, NOT_VALID_NPM_PACKAGE_NAME)), AddonModel::class.java)
 
         // test, it is not a valid addon for AnkiDroid
-        assertFalse(isValidAnkiDroidAddon(addonModel))
+        assertFalse(addonModel.isValidAnkiDroidAddon())
     }
 }

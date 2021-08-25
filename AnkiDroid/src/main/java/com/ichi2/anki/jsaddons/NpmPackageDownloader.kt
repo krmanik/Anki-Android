@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ichi2.anki.CollectionHelper
 import com.ichi2.anki.R
 import com.ichi2.anki.UIUtils
-import com.ichi2.anki.jsaddons.Addon.isValidAnkiDroidAddon
 import com.ichi2.anki.web.HttpFetcher
 import com.ichi2.async.ProgressSenderAndCancelListener
 import com.ichi2.async.TaskDelegate
@@ -60,7 +59,7 @@ class NpmPackageDownloader {
                 val addonModel = mapper.readValue(url, AddonModel::class.java)
 
                 // check if fields like ankidroidJsApi, addonType exists or not
-                if (!isValidAnkiDroidAddon(addonModel)) {
+                if (!addonModel.isValidAnkiDroidAddon()) {
                     return mContext.getString(R.string.is_not_valid_js_addon, mNpmPackageName)
                 }
 

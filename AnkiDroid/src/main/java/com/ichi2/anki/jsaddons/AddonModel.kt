@@ -17,7 +17,6 @@
 
 package com.ichi2.anki.jsaddons
 
-import android.annotation.SuppressLint
 import com.ichi2.anki.jsaddons.NpmUtils.ANKIDROID_JS_ADDON_KEYWORDS
 
 /**
@@ -29,7 +28,6 @@ import com.ichi2.anki.jsaddons.NpmUtils.ANKIDROID_JS_ADDON_KEYWORDS
  * ankiDroidJsApi, addonType and keywords --> this distinguish from other npm packages
  */
 
-@SuppressLint("NonPublicNonStaticFieldName")
 class AddonModel {
     val name: String? = null // name of npm package, it unique for each package listed on npm
     val addonTitle: String? = null // for showing in AnkiDroid
@@ -45,37 +43,35 @@ class AddonModel {
     val dist: Map<String, String>? = null
 }
 
-object Addon {
-    /**
-     * Check if npm package is valid or not by fields ankidroidJsApi, keywords (ankidroid-js-addon) and
-     * addon_type (reviewer or note editor) in addonModel
-     *
-     * @param addonModel mapped readvalue of fecthed npm package.json
-     * @return true for valid addon else false
-     */
-    fun isValidAnkiDroidAddon(addonModel: AddonModel): Boolean {
-        // either fields not present in package.json or failed to parse the fields
-        if (addonModel.name == null || addonModel.addonTitle == null || addonModel.main == null ||
-            addonModel.ankidroidJsApi == null || addonModel.addonType == null || addonModel.homepage == null ||
-            addonModel.keywords == null
-        ) {
-            return false
-        }
-
-        // if fields are empty
-        if (addonModel.name.isEmpty() || addonModel.addonTitle.isEmpty() || addonModel.main.isEmpty() ||
-            addonModel.ankidroidJsApi.isEmpty() || addonModel.addonType.isEmpty() || addonModel.homepage.isEmpty()
-        ) {
-            return false
-        }
-
-        // check if ankidroid-js-addon present or not in mapped addonModel
-        val jsAddonKeywordsPresent = addonModel.keywords.any { it == ANKIDROID_JS_ADDON_KEYWORDS }
-
-        // addon package.json should have js_api_version, ankidroid-js-addon keywords and addon type
-        return (
-            addonModel.ankidroidJsApi == NpmUtils.ANKIDROID_JS_API && jsAddonKeywordsPresent &&
-                (addonModel.addonType == NpmUtils.REVIEWER_ADDON || addonModel.addonType == NpmUtils.NOTE_EDITOR_ADDON)
-            )
+/**
+ * Check if npm package is valid or not by fields ankidroidJsApi, keywords (ankidroid-js-addon) and
+ * addon_type (reviewer or note editor) in addonModel
+ *
+ * @param addonModel mapped readvalue of fecthed npm package.json
+ * @return true for valid addon else false
+ */
+fun AddonModel.isValidAnkiDroidAddon(): Boolean {
+    // either fields not present in package.json or failed to parse the fields
+    if (name == null || addonTitle == null || main == null ||
+        ankidroidJsApi == null || addonType == null || homepage == null ||
+        keywords == null
+    ) {
+        return false
     }
+
+    // if fields are empty
+    if (name.isEmpty() || addonTitle.isEmpty() || main.isEmpty() ||
+        ankidroidJsApi.isEmpty() || addonType.isEmpty() || homepage.isEmpty()
+    ) {
+        return false
+    }
+
+    // check if ankidroid-js-addon present or not in mapped addonModel
+    val jsAddonKeywordsPresent = keywords.any { it == ANKIDROID_JS_ADDON_KEYWORDS }
+
+    // addon package.json should have js_api_version, ankidroid-js-addon keywords and addon type
+    return (
+        ankidroidJsApi == NpmUtils.ANKIDROID_JS_API && jsAddonKeywordsPresent &&
+            (addonType == NpmUtils.REVIEWER_ADDON || addonType == NpmUtils.NOTE_EDITOR_ADDON)
+        )
 }
