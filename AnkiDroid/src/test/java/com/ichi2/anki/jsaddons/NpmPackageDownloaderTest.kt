@@ -1,12 +1,12 @@
 package com.ichi2.anki.jsaddons
 
+import android.app.Dialog
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ichi2.anki.R
 import com.ichi2.anki.RobolectricTest
 import com.ichi2.anki.RunInBackground
 import com.ichi2.anki.web.HttpFetcher
-import com.ichi2.libanki.bool
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
@@ -46,14 +46,14 @@ class NpmPackageDownloaderTest : RobolectricTest() {
         val validUrl = URL(context.getString(R.string.npmjs_registry, VALID_ADDON_PACKAGE_NAME))
 
         // url will like this, version may be changed for new file
-        // https://registry.npmjs.org/valid-ankidroid-js-addon-test/-/valid-ankidroid-js-addon-test-1.0.0.tgz
+        val url: String = "https://registry.npmjs.org/valid-ankidroid-js-addon-test/-/valid-ankidroid-js-addon-test-1.0.0.tgz"
         var result: String? = NpmPackageDownloader.ShowHideInstallButton(context, VALID_ADDON_PACKAGE_NAME).getTarBallUrl(validUrl)
 
-        // use the .tgz url to download, extract and copy to addon folder
-        result = NpmPackageDownloader.DownloadAndExtract(context, result!!, VALID_ADDON_PACKAGE_NAME).downloadPackage()
+        // use the .tgz url to download
+        result = NpmPackageDownloader.DownloadAddon(context, result!!).downloadPackage()
 
         // compare success message
-        assertEquals(result, context.getString(R.string.addon_install_complete, VALID_ADDON_PACKAGE_NAME))
+        assertTrue("Valid .tgz file", result!!.endsWith(".tgz"))
     }
 
     @Test
@@ -70,8 +70,10 @@ class NpmPackageDownloaderTest : RobolectricTest() {
         val downloadFilePath = HttpFetcher.downloadFileToSdCardMethod(result, context, "addons", "GET")
 
         // is file extracted successfully
-        var extracted: bool? = NpmPackageDownloader.DownloadAndExtract(context, result!!, VALID_ADDON_PACKAGE_NAME)
+        var progressDialog = Dialog(context)
+        var extracted: String = NpmPackageDownloader.ExtractAddon(context, result!!, VALID_ADDON_PACKAGE_NAME)
             .extractAndCopyAddonTgz(downloadFilePath, VALID_ADDON_PACKAGE_NAME)
-        assumeTrue("File extract success", extracted!!)
+
+        assertEquals(extracted, context.getString(R.string.addon_install_complete, VALID_ADDON_PACKAGE_NAME))
     }
 }

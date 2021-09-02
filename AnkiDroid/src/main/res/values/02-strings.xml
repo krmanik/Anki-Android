@@ -399,7 +399,6 @@
     <string name="ankidroid_js_addon_npm_search_url">https://www.npmjs.com/search?q=keywords:ankidroid-js-addon</string>
     <string name="ankidroid_js_addon_npm_search_query_url">https://www.npmjs.com/search?q=</string>
     <string name="addons">Addons</string>
-    <string name="addon_installed">Addon Installed</string>
     <string name="addon_install_complete">%s addon installation complete</string>
     <string name="download_addon">Download Addon</string>
     <string name="js_addons">JavaScript Addons</string>
@@ -411,4 +410,8 @@
     <string name="search_using_addon_name">Search using addon name</string>
     <string name="extracting_npm_package">Extracting...</string>
     <string name="downloading_npm_package">Downloading...</string>
+    <string name="confirm_install">Confirm install?</string>
+    <string name="confirm_addon_install_message">Are you sure you want to install %s?</string>
+    <string name="failed">Failed</string>
+    <string name="success">Success</string>
 </resources>
