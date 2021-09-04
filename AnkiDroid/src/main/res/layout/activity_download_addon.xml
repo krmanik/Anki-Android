@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".jsaddons.AddonDownloadActivity">
+    tools:context=".jsaddons.AddonsDownloadActivity">
     
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/webview_toolbar"

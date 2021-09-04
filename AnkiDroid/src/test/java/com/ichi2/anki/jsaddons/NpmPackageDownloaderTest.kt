@@ -1,79 +1,98 @@
+/****************************************************************************************
+ *                                                                                      *
+ * Copyright (c) 2021 Mani infinyte01@gmail.com                                         *
+ *                                                                                      *
+ * This program is free software; you can redistribute it and/or modify it under        *
+ * the terms of the GNU General Public License as published by the Free Software        *
+ * Foundation; either version 3 of the License, or (at your option) any later           *
+ * version.                                                                             *
+ *                                                                                      *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY      *
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
+ * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
+ *                                                                                      *
+ * You should have received a copy of the GNU General Public License along with         *
+ * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
+ ****************************************************************************************/
+
 package com.ichi2.anki.jsaddons
 
-import android.app.Dialog
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.ichi2.anki.R
-import com.ichi2.anki.RobolectricTest
-import com.ichi2.anki.RunInBackground
-import com.ichi2.anki.web.HttpFetcher
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
+import com.ichi2.anki.*
+import junit.framework.TestCase.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import java.net.URL
 import java.util.concurrent.ExecutionException
 
 @RunWith(AndroidJUnit4::class)
 class NpmPackageDownloaderTest : RobolectricTest() {
-    private val NOT_VALID_ADDON_PACKAGE_NAME = "not-valid-ankidroid-js-addon-test"
-    private val VALID_ADDON_PACKAGE_NAME = "valid-ankidroid-js-addon-test"
-    private val context: Context = targetContext
+    private lateinit var context: Context
+    private lateinit var url: URL
+    private lateinit var tarballUrl: String
+    private lateinit var packageName: String
+    private lateinit var downloadPath: String
+    private lateinit var result: MutableList<AddonModel>
+    private lateinit var currentAnkiDroidDirectory: String
+    private lateinit var addonDir: File
+
+    @Before
+    override fun setUp() {
+        super.setUp()
+        context = targetContext
+
+        url = URL(context.getString(R.string.ankidroid_js_addon_json))
+        result = NpmPackageDownloader.GetAddonsPackageJson(context).getJson(url)!!
+
+        // For valid json the following will be true
+        tarballUrl = result[0].dist?.get("tarball")!!
+        packageName = result[0].name!!
+
+        // use the .tgz url to download
+        downloadPath = NpmPackageDownloader.DownloadAddon(context, tarballUrl).downloadPackage()
+
+        currentAnkiDroidDirectory = CollectionHelper.getCurrentAnkiDroidDirectory(context)
+        addonDir = File(currentAnkiDroidDirectory, "addons")
+    }
 
     @Test
     @RunInBackground
     @Throws(ExecutionException::class, InterruptedException::class)
-    fun getTarBallUrlTest() {
-        val validUrl = URL(context.getString(R.string.npmjs_registry, VALID_ADDON_PACKAGE_NAME))
-        var result: String? = NpmPackageDownloader.ShowHideInstallButton(context, VALID_ADDON_PACKAGE_NAME).getTarBallUrl(validUrl)
+    fun getAddonsPackageJsonTest() {
+        assertNotNull(result)
 
-        // url will like this, version may be changed for new file
-        // https://registry.npmjs.org/valid-ankidroid-js-addon-test/-/valid-ankidroid-js-addon-test-1.0.0.tgz
-        assertTrue("Valid .tgz file", (result!!.startsWith("https://") && (result!!.endsWith(".tgz"))))
-
-        val inValidUrl = URL(context.getString(R.string.npmjs_registry, NOT_VALID_ADDON_PACKAGE_NAME))
-        result = NpmPackageDownloader.ShowHideInstallButton(context, VALID_ADDON_PACKAGE_NAME).getTarBallUrl(inValidUrl)
-
-        // for invalid package url, result will be error
-        assertFalse("Not a valid .tgz url", result!!.startsWith("https://"))
+        // Take any two and check if tarball url exists or not
+        // For valid json the following will be true
+        assertTrue(result[0].dist?.get("tarball")?.startsWith("https://")!!)
+        assertTrue(result[1].dist?.get("tarball")?.endsWith(".tgz")!!)
     }
 
     @Test
     @RunInBackground
     @Throws(ExecutionException::class, InterruptedException::class)
     fun downloadPackageTest() {
-        val validUrl = URL(context.getString(R.string.npmjs_registry, VALID_ADDON_PACKAGE_NAME))
-
-        // url will like this, version may be changed for new file
-        val url: String = "https://registry.npmjs.org/valid-ankidroid-js-addon-test/-/valid-ankidroid-js-addon-test-1.0.0.tgz"
-        var result: String? = NpmPackageDownloader.ShowHideInstallButton(context, VALID_ADDON_PACKAGE_NAME).getTarBallUrl(validUrl)
+        assertNotNull(result)
 
         // use the .tgz url to download
-        result = NpmPackageDownloader.DownloadAddon(context, result!!).downloadPackage()
+        val downloadPath = NpmPackageDownloader.DownloadAddon(context, tarballUrl).downloadPackage()
 
-        // compare success message
-        assertTrue("Valid .tgz file", result!!.endsWith(".tgz"))
+        // is tgz file
+        assertTrue("Valid .tgz file", downloadPath.endsWith(".tgz"))
     }
 
     @Test
     @RunInBackground
     @Throws(ExecutionException::class, InterruptedException::class)
     fun extractAndCopyAddonTgzTest() {
-        val validUrl = URL(context.getString(R.string.npmjs_registry, VALID_ADDON_PACKAGE_NAME))
-
-        // url will like this, version may be changed for new file
-        // https://registry.npmjs.org/valid-ankidroid-js-addon-test/-/valid-ankidroid-js-addon-test-1.0.0.tgz
-        var result: String? = NpmPackageDownloader.ShowHideInstallButton(context, VALID_ADDON_PACKAGE_NAME).getTarBallUrl(validUrl)
-
-        // download .tgz file from previous result
-        val downloadFilePath = HttpFetcher.downloadFileToSdCardMethod(result, context, "addons", "GET")
+        assertNotNull(result)
 
         // is file extracted successfully
-        var progressDialog = Dialog(context)
-        var extracted: String = NpmPackageDownloader.ExtractAddon(context, result!!, VALID_ADDON_PACKAGE_NAME)
-            .extractAndCopyAddonTgz(downloadFilePath, VALID_ADDON_PACKAGE_NAME)
+        val extracted: String = NpmPackageDownloader.ExtractAddon(context, downloadPath, packageName)
+            .extractAndCopyAddonTgz(downloadPath, packageName)
 
-        assertEquals(extracted, context.getString(R.string.addon_install_complete, VALID_ADDON_PACKAGE_NAME))
+        assertEquals(extracted, context.getString(R.string.addon_install_complete, packageName))
     }
 }

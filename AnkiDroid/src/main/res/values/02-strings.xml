@@ -421,22 +421,34 @@
     <string name="scoped_storage_learn_more">Learn More</string>
     <string name="scoped_storage_postpone">Postpone</string>
     <string name="scoped_storage_migrate">Migrate</string>
+
     <!-- for js addons, npnjs registry url to download addon package file -->
     <string name="npmjs_registry" translatable="false">https://registry.npmjs.org/%s/latest</string>
     <string name="is_not_valid_js_addon">%s is not a valid js addon package for AnkiDroid</string>
-    <string name="error_occur_downloading_addon">Error occur in downloading %s addon. Try again</string>
-    <string name="confirm_install">Confirm install?</string>
-    <string name="confirm_addon_install_message">Are you sure you want to install %s?</string>
+    <string name="error_occur_downloading_addon">Error occur in downloading packages json. Try again</string>
     <string name="downloading_npm_package">Downloading...</string>
     <string name="extracting_npm_package">Extracting...</string>
     <string name="failed_to_extract_addon_package">Failed to extract the %s addon package</string>
     <string name="failed">Failed</string>
     <string name="success">Success</string>
     <string name="addon_install_complete">%s addon installation complete</string>
-    <string name="ankidroid_js_addon_npm_search_url">https://www.npmjs.com/search?q=keywords:ankidroid-js-addon</string>
-    <string name="ankidroid_js_addon_npm_search_query_url">https://www.npmjs.com/search?q=</string>
-    <string name="search_using_addon_name">Search using addon name</string>
-    <string name="install_js_addon">Install Addon</string>
+    <string name="ankidroid_js_addon_json">https://raw.githubusercontent.com/infinyte7/anki-js-addon-json/main/anki-js-addon.json</string>
     <string name="get_addons">Get Addons</string>
     <string name="download_addons">Download Addons</string>
+    <string name="js_addons">JavaScript Addons</string>
+    <string name="addons">Addons</string>
+    <string name="addon_enabled">%s addon enabled</string>
+    <string name="addon_disabled">%s addon disabled</string>
+    <string name="confirm_remove_addon">Do you want to remove %s ?</string>
+    <string name="failed_to_remove_addon">Failed to remove addon. Try again or remove it manually</string>
+    <string name="addon_version">Version</string>
+    <string name="ankidroid_js_api_version">AnkiDroid JS API Version</string>
+    <string name="npm_package_name">NPM Package Name</string>
+    <string name="addon_type" comment="Addon type reviewer or note-editor">Type </string>
+    <string name="addon_author">Author</string>
+    <string name="addon_license">License</string>
+    <string name="addon_homepage">Homepage</string>
+    <string name="addon_details">Details</string>
+    <string name="addon_type_and_version">Type: %s  Version: %s</string>
+    <string name="no_addons_found">No Addons found, Get addons from options menu</string>
 </resources>
