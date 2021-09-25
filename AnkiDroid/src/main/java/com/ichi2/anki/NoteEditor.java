@@ -27,25 +27,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.CheckResult;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.annotation.StringRes;
-import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.PopupMenu;
-
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-
 import android.util.Pair;
 import android.view.ActionMode;
 import android.view.KeyEvent;
@@ -53,19 +44,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ichi2.anki.dialogs.ConfirmationDialog;
 import com.ichi2.anki.dialogs.DeckSelectionDialog;
 import com.ichi2.anki.dialogs.DiscardChangesDialog;
@@ -75,6 +67,9 @@ import com.ichi2.anki.dialogs.tags.TagsDialog;
 import com.ichi2.anki.dialogs.tags.TagsDialogFactory;
 import com.ichi2.anki.dialogs.tags.TagsDialogListener;
 import com.ichi2.anki.exception.ConfirmModSchemaException;
+import com.ichi2.anki.jsaddons.AddonModel;
+import com.ichi2.anki.jsaddons.AddonToolsAdapter;
+import com.ichi2.anki.jsaddons.AddonToolsModel;
 import com.ichi2.anki.multimediacard.IMultimediaEditableNote;
 import com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity;
 import com.ichi2.anki.multimediacard.fields.AudioClipField;
@@ -84,60 +79,75 @@ import com.ichi2.anki.multimediacard.fields.IField;
 import com.ichi2.anki.multimediacard.fields.ImageField;
 import com.ichi2.anki.multimediacard.fields.TextField;
 import com.ichi2.anki.multimediacard.impl.MultimediaEditableNote;
+import com.ichi2.anki.noteeditor.CustomToolbarButton;
 import com.ichi2.anki.noteeditor.FieldState;
 import com.ichi2.anki.noteeditor.FieldState.FieldChangeType;
-import com.ichi2.anki.noteeditor.CustomToolbarButton;
 import com.ichi2.anki.noteeditor.Toolbar;
 import com.ichi2.anki.receiver.SdCardReceiver;
 import com.ichi2.anki.servicelayer.NoteService;
 import com.ichi2.anki.ui.NoteTypeSpinnerUtils;
 import com.ichi2.anki.widgets.DeckDropDownAdapter;
+import com.ichi2.anki.widgets.PopupMenuWithIcons;
 import com.ichi2.async.CollectionTask;
 import com.ichi2.async.TaskListenerWithContext;
 import com.ichi2.async.TaskManager;
 import com.ichi2.compat.CompatHelper;
 import com.ichi2.libanki.Card;
 import com.ichi2.libanki.Collection;
-import com.ichi2.libanki.Models;
+import com.ichi2.libanki.Deck;
 import com.ichi2.libanki.Model;
+import com.ichi2.libanki.Models;
 import com.ichi2.libanki.Note;
 import com.ichi2.libanki.Note.ClozeUtils;
 import com.ichi2.libanki.Utils;
-import com.ichi2.libanki.Deck;
 import com.ichi2.themes.StyledProgressDialog;
 import com.ichi2.themes.Themes;
-import com.ichi2.anki.widgets.PopupMenuWithIcons;
 import com.ichi2.utils.AdaptionUtil;
 import com.ichi2.utils.FunctionalInterfaces.Consumer;
 import com.ichi2.utils.HashUtil;
+import com.ichi2.utils.JSONArray;
+import com.ichi2.utils.JSONObject;
 import com.ichi2.utils.KeyUtils;
 import com.ichi2.utils.MapUtil;
-import com.ichi2.utils.NamedJSONComparator;
 import com.ichi2.utils.NoteFieldDecorator;
 import com.ichi2.utils.TextViewUtil;
 import com.ichi2.widget.WidgetStatus;
 
-import com.ichi2.utils.JSONArray;
-import com.ichi2.utils.JSONObject;
-
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.StringRes;
+import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.text.HtmlCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import timber.log.Timber;
+
+import static com.ichi2.anim.ActivityTransitionAnimation.Direction.END;
+import static com.ichi2.anim.ActivityTransitionAnimation.Direction.NONE;
+import static com.ichi2.anim.ActivityTransitionAnimation.Direction.START;
+import static com.ichi2.anki.jsaddons.NpmUtils.NOTE_EDITOR_ADDON;
 import static com.ichi2.compat.Compat.ACTION_PROCESS_TEXT;
 import static com.ichi2.compat.Compat.EXTRA_PROCESS_TEXT;
-
-import static com.ichi2.anim.ActivityTransitionAnimation.Direction.*;
 import static com.ichi2.libanki.Decks.CURRENT_DECK;
 import static com.ichi2.libanki.Models.NOT_FOUND_NOTE_TYPE;
 
@@ -151,7 +161,8 @@ import static com.ichi2.libanki.Models.NOT_FOUND_NOTE_TYPE;
 public class NoteEditor extends AnkiActivity implements
         DeckSelectionDialog.DeckSelectionListener,
         DeckDropDownAdapter.SubtitleListener,
-        TagsDialogListener {
+        TagsDialogListener,
+        AddonToolsAdapter.OnAddonClickListener {
     // DA 2020-04-13 - Refactoring Plans once tested:
     // * There is a difference in functionality depending on whether we are editing
     // * Extract mAddNote and mCurrentEditedCard into inner class. Gate mCurrentEditedCard on edit state.
@@ -254,6 +265,10 @@ public class NoteEditor extends AnkiActivity implements
 
     // Use the same HTML if the same image is pasted multiple times.
     private HashMap<String, String> mPastedImageCache = new HashMap<>();
+
+    // addon tools list
+    private List<AddonToolsModel> addonToolsModelList = new ArrayList<AddonToolsModel>();
+    private RecyclerView addonToolsRecyclerView;
 
     private final Onboarding.NoteEditor mOnboarding = new Onboarding.NoteEditor(this);
 
@@ -1069,6 +1084,8 @@ public class NoteEditor extends AnkiActivity implements
         menu.findItem(R.id.action_show_toolbar).setChecked(!shouldHideToolbar());
         menu.findItem(R.id.action_capitalize).setChecked(AnkiDroidApp.getSharedPrefs(this).getBoolean("note_editor_capitalize", true));
 
+        showAddonToolbar(!shouldHideToolbar());
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -1115,6 +1132,7 @@ public class NoteEditor extends AnkiActivity implements
             item.setChecked(!item.isChecked());
             AnkiDroidApp.getSharedPrefs(this).edit().putBoolean("noteEditorShowToolbar", item.isChecked()).apply();
             updateToolbar();
+            showAddonToolbar(item.isChecked());
         } else if (itemId == R.id.action_capitalize) {
             Timber.i("NoteEditor:: Capitalize button pressed. New State: %b", !item.isChecked());
             item.setChecked(!item.isChecked()); // Needed for Android 9
@@ -1890,6 +1908,9 @@ public class NoteEditor extends AnkiActivity implements
         final Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_add_toolbar_icon, null);
         drawable.setTint(Themes.getColorFromAttr(NoteEditor.this, R.attr.toolbarIconColor));
         mToolbar.insertItem(0, drawable, this::displayAddToolbarDialog);
+
+        View jsAddonIcon = mToolbar.getJSAddonIcon();
+        jsAddonIcon.setOnClickListener(l ->  showJSAddonsRecyclerView());
     }
 
     @NonNull
@@ -2361,4 +2382,97 @@ public class NoteEditor extends AnkiActivity implements
             }
         }
     }
+
+
+    @Override
+    public void onAddonClick(int position) {
+        AddonToolsModel addonToolsModel = addonToolsModelList.get(position);
+        Timber.d("Clicked on addon %s", addonToolsModel.getName());
+
+        if (addonToolsModel.getName().equals("first")) {
+            addonToolsRecyclerView.setVisibility(View.GONE);
+            return;
+        }
+    }
+
+    private void showAddonToolbar(boolean isChecked) {
+        addonToolsRecyclerView = findViewById(R.id.addon_tools_list);
+        addonToolsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        addonToolsRecyclerView.setVisibility(View.GONE);
+        addonToolsRecyclerView.setBackgroundColor(Themes.getColorFromAttr(NoteEditor.this, R.attr.toolbarBackgroundColor));
+
+        if (isChecked) {
+            listEnabledAddonsFromDir();
+        }
+    }
+
+    private void showJSAddonsRecyclerView() {
+        addonToolsRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    public void listEnabledAddonsFromDir() {
+        String currentAnkiDroidDirectory = CollectionHelper.getCurrentAnkiDroidDirectory(this);
+        File addonsHomeDir = new File(currentAnkiDroidDirectory, "addons");
+
+        if (!addonsHomeDir.exists()) {
+            addonsHomeDir.mkdirs();
+        }
+
+        SharedPreferences preferences = AnkiDroidApp.getSharedPrefs(this);
+        Set<String>  noteEditorEnabledAddonSet = preferences.getStringSet(NOTE_EDITOR_ADDON, new HashSet<>());
+
+        // for creating new list from scratch
+        addonToolsModelList.clear();
+
+        // Icon for addon
+        Drawable bmp = mToolbar.createDrawableForString("<");
+        ImageView imageView = new ImageView(this);
+        imageView.setImageDrawable(bmp);
+        // first button for hiding
+        AddonToolsModel addonToolsModel = new AddonToolsModel("first", imageView);
+        addonToolsModelList.add(addonToolsModel);
+
+        for (String enabledAddon : noteEditorEnabledAddonSet) {
+            try {
+                // AnkiDroid/addons/js-addons/package/index.js
+                // here enabledAddon is id of npm package which may not contain ../ or other bad path
+                String joinedPath = new StringJoiner("/")
+                        .add(currentAnkiDroidDirectory)
+                        .add("addons")
+                        .add(enabledAddon)
+                        .add("package")
+                        .toString();
+
+                // user removed content from folder and prefs not updated then remove it
+                File addonsPackageJson = new File(joinedPath, "package.json");
+                File addonsIndexJs = new File(joinedPath, "index.js");
+                File addonIcon = new File(joinedPath, "icon.png");
+
+                if (!addonsPackageJson.exists() || !addonsIndexJs.exists() || !addonIcon.exists()) {
+                    // skip this and list next addon
+                    continue;
+                }
+
+                ObjectMapper mapper = new ObjectMapper()
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+                AddonModel addonModel = mapper.readValue(addonsPackageJson, AddonModel.class);
+                imageView = new ImageView(this);
+                bmp = mToolbar.createDrawableForString("A");
+                imageView.setImageDrawable(bmp);
+
+                addonToolsModel = new AddonToolsModel(Objects.requireNonNull(addonModel.getName()), imageView);
+                addonToolsModelList.add(addonToolsModel);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Timber.w(e, "AbstractFlashcardViewer::Exception");
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Timber.w(e, "AbstractFlashcardViewer::Exception");
+            }
+        }
+
+        addonToolsRecyclerView.setAdapter(new AddonToolsAdapter(addonToolsModelList, this));
+    }
+
 }

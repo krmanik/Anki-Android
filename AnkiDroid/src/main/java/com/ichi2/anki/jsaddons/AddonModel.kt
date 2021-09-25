@@ -32,6 +32,7 @@ import com.ichi2.anki.jsaddons.NpmUtils.ANKIDROID_JS_ADDON_KEYWORDS
 class AddonModel {
     val name: String? = null // name of npm package, it unique for each package listed on npm
     val addonTitle: String? = null // for showing in AnkiDroid
+    val icon: String? = null
     val version: String? = null
     val description: String? = null
     val main: String? = null
