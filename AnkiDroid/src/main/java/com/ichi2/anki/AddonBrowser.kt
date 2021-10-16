@@ -68,6 +68,11 @@ class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
         return resources.getString(R.string.js_addons)
     }
 
+    override fun onResume() {
+        super.onResume()
+        listAddonsFromDir()
+    }
+
     /**
      * It adds a **Get More Addons** menu button to Addnon Browser screen
      * When **Get More Addons** button is clicked,
