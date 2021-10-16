@@ -64,6 +64,7 @@ class NoteEditorAddon(private val activity: NoteEditor) {
                 // user removed content from folder and prefs not updated then remove it
                 val addonsPackageJson = File(joinedPath, "package.json")
                 val addonsIndexJs = File(joinedPath, "index.js")
+                val configJson = File(joinedPath, "config.json")
                 val mapper = ObjectMapper()
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 val addonModel = mapper.readValue(addonsPackageJson, AddonModel::class.java)
@@ -75,7 +76,7 @@ class NoteEditorAddon(private val activity: NoteEditor) {
                 }
 
                 val bmp: Drawable = toolbar.createDrawableForString(addonModel.icon)
-                val v: View = toolbar.insertItem(0, bmp, runJsCode(jsEvaluator, addonsIndexJs))
+                val v: View = toolbar.insertItem(0, bmp, runJsCode(jsEvaluator, addonsIndexJs, configJson))
 
                 v.setOnLongClickListener {
                     AddonConfigEditor().showConfig(addonModel.name, activity, currentAnkiDroidDirectory)
@@ -87,7 +88,7 @@ class NoteEditorAddon(private val activity: NoteEditor) {
         }
     }
 
-    private fun runJsCode(jsEvaluator: JsEvaluator, indexJs: File?): Runnable {
+    private fun runJsCode(jsEvaluator: JsEvaluator, indexJs: File?, configJson: File?): Runnable {
         return Runnable {
             val content = StringBuilder()
 
@@ -110,6 +111,7 @@ class NoteEditorAddon(private val activity: NoteEditor) {
                 val selectedText = getSelectedText()
                 val fieldsCount = fieldsNameList.size
                 val focusedFieldText = getFocusedFieldText()
+                val configData = getConfigData(configJson!!)
 
                 val jsonObject = JSONObject()
                 jsonObject.put("noteType", noteType)
@@ -118,6 +120,7 @@ class NoteEditorAddon(private val activity: NoteEditor) {
                 jsonObject.put("fieldsCount", fieldsCount)
                 jsonObject.put("selectedText", selectedText)
                 jsonObject.put("focusedFieldText", focusedFieldText)
+                jsonObject.put("configData", configData)
 
                 Timber.i("Data From AnkiDroid To Addon: %s", jsonObject.toString())
 
@@ -235,5 +238,31 @@ class NoteEditorAddon(private val activity: NoteEditor) {
                 break
             }
         }
+    }
+
+    private fun getConfigData(configJson: File): String? {
+        if (!configJson.exists()) {
+            return null
+        }
+
+        val text = StringBuilder()
+
+        try {
+            val br = BufferedReader(FileReader(configJson))
+            var line: String?
+
+            while (br.readLine().also { line = it } != null) {
+                text.append(line).append("\n")
+            }
+            br.close()
+
+            Timber.i("ret::%s", text.toString())
+            return text.toString()
+        } catch (e: FileNotFoundException) {
+            Timber.w("FileNotFoundException::%s", e.toString())
+        } catch (e: IOException) {
+            Timber.e("IOException::%s", e.toString())
+        }
+        return null
     }
 }
