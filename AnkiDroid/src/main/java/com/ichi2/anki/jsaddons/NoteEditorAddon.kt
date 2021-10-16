@@ -21,6 +21,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.view.View
+import android.webkit.JavascriptInterface
 import com.evgenii.jsevaluator.JsEvaluator
 import com.evgenii.jsevaluator.interfaces.JsCallback
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -28,8 +29,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ichi2.anki.*
 import com.ichi2.anki.jsaddons.NpmUtils.NOTE_EDITOR_ADDON
 import com.ichi2.anki.noteeditor.Toolbar
-import com.ichi2.utils.JSONArray
-import com.ichi2.utils.JSONObject
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import timber.log.Timber
 import java.io.*
 import java.util.*
@@ -49,6 +51,7 @@ class NoteEditorAddon(private val activity: NoteEditor) {
         val preferences = AnkiDroidApp.getSharedPrefs(mContext)
         val noteEditorEnabledAddonSet = preferences.getStringSet(NOTE_EDITOR_ADDON, HashSet())
         val jsEvaluator = JsEvaluator(mContext)
+        jsEvaluator.webView.addJavascriptInterface(NoteEditorJS(mContext), "NoteEditorJS")
 
         for (enabledAddon in noteEditorEnabledAddonSet!!) {
             try {
@@ -79,7 +82,7 @@ class NoteEditorAddon(private val activity: NoteEditor) {
                 val v: View = toolbar.insertItem(0, bmp, runJsCode(jsEvaluator, addonsIndexJs, configJson))
 
                 v.setOnLongClickListener {
-                    AddonConfigEditor().showConfig(addonModel.name, activity, currentAnkiDroidDirectory)
+                    AddonConfigEditor(activity).showConfig(addonModel.name, currentAnkiDroidDirectory)
                     true
                 }
             } catch (e: IOException) {
@@ -138,12 +141,20 @@ class NoteEditorAddon(private val activity: NoteEditor) {
                     "AnkiJSFunction", jsonObject.toString()
                 ) // name in index.js in addon folder must be AnkiJSFunction
             } catch (e: IOException) {
-                Timber.e(e.localizedMessage)
+                Timber.w("JsEvaluator::IOException:: %s", e.toString())
+                UIUtils.showThemedToast(mContext, e.localizedMessage, true)
+            } catch (e: JSONException) {
+                Timber.w("JsEvaluator::JSONException:: %s", e.toString())
+                UIUtils.showThemedToast(mContext, e.localizedMessage, true)
+            } catch (e: NullPointerException) {
+                Timber.w("JsEvaluator::NullPointerException:: %s", e.toString())
+                UIUtils.showThemedToast(mContext, e.localizedMessage, true)
             }
         }
     }
 
-    private fun jsAddonParseResult(result: String) {
+    @Throws(JSONException::class)
+    fun jsAddonParseResult(result: String) {
         /*
          * parse result in json format
          *
@@ -159,24 +170,37 @@ class NoteEditorAddon(private val activity: NoteEditor) {
          *  change option - replace, append, clear, default - with selected text
          **/
 
-        val jsonObject = JSONObject(result)
-        val changedText = jsonObject.optString("changedText", "")
-        val changeType = jsonObject.optString("changeType", "")
-        val addToFields = jsonObject.optJSONObject("addToFields")
-        Timber.d("Data From Addon To AnkiDroid: %s", jsonObject.toString())
+        try {
 
-        if (addToFields != null) {
-            val size = addToFields.names()?.length()
-
-            for (i in 0 until size!!) {
-                val keyIndex = Objects.requireNonNull(addToFields.names()).getString(i)
-                val value = addToFields.optString(Objects.requireNonNull(addToFields.names()).getString(i))
-                Timber.d("js addon key::value : %s :: %s", keyIndex, value)
-                val field: FieldEditText = mEditFields[keyIndex.toInt()]
-                field.setText(value)
+            if (result.isNullOrBlank()) {
+                return
             }
+
+            val jsonObject = JSONObject(result)
+            val changedText = jsonObject.optString("changedText", "")
+            val changeType = jsonObject.optString("changeType", "")
+            val addToFields = jsonObject.optJSONObject("addToFields")
+            Timber.d("Data From Addon To AnkiDroid: %s", jsonObject.toString())
+
+            if (addToFields != null) {
+                val size = addToFields.names()?.length()
+
+                for (i in 0 until size!!) {
+                    val keyIndex = Objects.requireNonNull(addToFields.names()).getString(i)
+                    val value = addToFields.optString(Objects.requireNonNull(addToFields.names()).getString(i))
+                    Timber.d("js addon key::value : %s :: %s", keyIndex, value)
+                    val field: FieldEditText = mEditFields[keyIndex.toInt()]
+                    field.setText(value)
+                }
+            }
+            changeEditFieldWithSelectedText(changedText, changeType)
+        } catch (e: IndexOutOfBoundsException) {
+            Timber.w("NoteEditorAddon::IndexOutOfBoundsException:: %s", e.toString())
+            UIUtils.showThemedToast(mContext, e.localizedMessage, true)
+        } catch (e: JSONException) {
+            Timber.w("NoteEditorAddon::JSONException:: %s", e.toString())
+            UIUtils.showThemedToast(mContext, e.localizedMessage, true)
         }
-        changeEditFieldWithSelectedText(changedText, changeType)
     }
 
     private fun getSelectedText(): String {
@@ -264,5 +288,28 @@ class NoteEditorAddon(private val activity: NoteEditor) {
             Timber.e("IOException::%s", e.toString())
         }
         return null
+    }
+
+    /**
+     * JavaScript Interface for calling functions below in webview to save and read data
+     */
+    inner class NoteEditorJS(private var context: Context) {
+        @JavascriptInterface
+        fun addDataToFields(data: String) {
+            activity.runOnUiThread {
+                Timber.i("From Addon:: %s", data)
+                jsAddonParseResult(data)
+            }
+        }
+
+        @JavascriptInterface
+        fun getEditFieldsSize(): Int {
+            return mEditFields.size
+        }
+
+        @JavascriptInterface
+        fun toast(msg: String) {
+            UIUtils.showThemedToast(context, msg, true)
+        }
     }
 }
