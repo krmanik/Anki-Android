@@ -80,7 +80,7 @@ class AddonsAdapter(private var addonList: MutableList<AddonModel>) : RecyclerVi
         }
 
         holder.configBtn.setOnClickListener {
-            AddonConfigEditor().showConfig(addonModel.name, context as Activity, currentAnkiDroidDirectory)
+            AddonConfigEditor(context as Activity).showConfig(addonModel.name, currentAnkiDroidDirectory)
         }
 
         // remove addon from directory and update prefs

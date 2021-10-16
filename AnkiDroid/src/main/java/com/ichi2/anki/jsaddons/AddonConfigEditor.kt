@@ -31,15 +31,14 @@ import timber.log.Timber
 import java.io.*
 import java.util.*
 
-class AddonConfigEditor {
+class AddonConfigEditor(private var activity: Activity) {
+    val context: Context = activity.applicationContext
 
     /**
      * Show webview with config.html page from addon package directory as url
      * Also create JavaScriptInterface with config.json file, for reading and writing data
      */
-    fun showConfig(adddonName: String?, activity: Activity, currentAnkiDroidDirectory: String?) {
-        val context: Context = activity.applicationContext
-
+    fun showConfig(adddonName: String?, currentAnkiDroidDirectory: String?) {
         val joinedPath = StringJoiner("/")
             .add(currentAnkiDroidDirectory)
             .add("addons")
@@ -61,7 +60,7 @@ class AddonConfigEditor {
         val webView = WebView(context)
         webView.webViewClient = mWebViewClient
         webView.settings.javaScriptEnabled = true
-        webView.addJavascriptInterface(ConfigEditor(alert, configJson), "ConfigEditor")
+        webView.addJavascriptInterface(ConfigEditor(context, alert, configJson), "ConfigEditor")
 
         val keyboardHack = EditText(context)
         keyboardHack.visibility = View.GONE
@@ -87,7 +86,7 @@ class AddonConfigEditor {
     /**
      * JavaScript Interface for calling functions below in webview to save and read data
      */
-    class ConfigEditor(private var alert: AlertDialog?, private var configJson: String?) {
+    inner class ConfigEditor(private var context: Context, private var alert: AlertDialog?, private var configJson: String?) {
         @JavascriptInterface
         fun save(data: String): Boolean {
             Timber.i("save::%s", data)
@@ -135,6 +134,11 @@ class AddonConfigEditor {
         @JavascriptInterface
         fun close() {
             alert?.dismiss()
+        }
+
+        @JavascriptInterface
+        fun toast(msg: String) {
+            UIUtils.showThemedToast(context, msg, true)
         }
     }
 }
