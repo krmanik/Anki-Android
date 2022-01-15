@@ -425,4 +425,14 @@
     <string name="scoped_storage_learn_more">Learn More</string>
     <string name="scoped_storage_postpone">Postpone</string>
     <string name="scoped_storage_migrate">Migrate</string>
+
+    <!-- for js addons, npmjs registry url to download addon package file -->
+    <string name="npmjs_registry" translatable="false">https://registry.npmjs.org/%s/latest</string>
+    <string name="npm_package_name">NPM Package Name</string>
+    <string name="addon_version">Version</string>
+    <string name="ankidroid_js_api_version">AnkiDroid JS API Version</string>
+    <string name="addon_type" comment="Addon type reviewer or note-editor">Type </string>
+    <string name="addon_author">Author</string>
+    <string name="addon_license">License</string>
+    <string name="addon_homepage">Homepage</string>
 </resources>
