@@ -27,11 +27,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.ichi2.anki.jsaddons.AddonModel
-import com.ichi2.anki.jsaddons.AddonsAdapter
-import com.ichi2.anki.jsaddons.AddonsDownloadActivity
-import com.ichi2.anki.jsaddons.isValidAnkiDroidAddon
+import com.ichi2.anim.ActivityTransitionAnimation
+import com.ichi2.anki.jsaddons.*
 import com.ichi2.anki.widgets.DeckDropDownAdapter.SubtitleListener
+import com.ichi2.async.TaskManager
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
@@ -42,7 +41,10 @@ import java.io.IOException
  * Also 'Get Addons' menu added to option menu of this Activity, view onCreateOptionsMenu below
  */
 class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
+    private lateinit var mAddonsList: MutableList<AddonModel>
     private lateinit var mAddonsListRecyclerView: RecyclerView
+    private val GET_ADDONS = "get_addons"
+    private var mBooleanExtra: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (showedActivityFailedScreen(savedInstanceState)) {
@@ -63,7 +65,14 @@ class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
         mAddonsListRecyclerView.layoutManager = LinearLayoutManager(this)
 
         hideProgressBar()
-        listAddonsFromDir()
+
+        // if activity is created from Addons Browser or Get Addons
+        mBooleanExtra = intent.getBooleanExtra(GET_ADDONS, false)
+        if (mBooleanExtra) {
+            fetchAddonsPackageJson()
+        } else {
+            listAddonsFromDir()
+        }
     }
 
     /**
@@ -77,14 +86,23 @@ class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.addon_browser, menu)
         val getMoreAddons = menu.findItem(R.id.action_get_more_addons)
+
         getMoreAddons.setOnMenuItemClickListener {
-            val intent = Intent(this, AddonsDownloadActivity::class.java)
-            startActivityWithoutAnimation(intent)
+            // clear items from recycler view with empty list
+            mAddonsList.clear()
+            mAddonsListRecyclerView.adapter?.notifyDataSetChanged()
+
+            val intent = Intent(this, AddonBrowser::class.java)
+            intent.putExtra(GET_ADDONS, true)
+            startActivityWithAnimation(intent, ActivityTransitionAnimation.Direction.START)
             true
         }
         return super.onCreateOptionsMenu(menu)
     }
 
+    /**
+     * List addons from directory, for valid package.json the addons will be added to view
+     */
     private fun listAddonsFromDir() {
         val currentAnkiDroidDirectory = CollectionHelper.getCurrentAnkiDroidDirectory(this)
 
@@ -96,7 +114,7 @@ class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
 
         Timber.d("List addon from directory.")
 
-        val addonsList: MutableList<AddonModel> = ArrayList()
+        mAddonsList = ArrayList()
         try {
             val files = addonsDir.listFiles()
             for (file in files!!) {
@@ -107,17 +125,17 @@ class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
                 val addonModel = mapper.readValue(File(file, "package/package.json"), AddonModel::class.java)
 
                 if (addonModel.isValidAnkiDroidAddon()) {
-                    addonsList.add(addonModel)
+                    mAddonsList.add(addonModel)
                 }
             }
 
-            if (addonsList.size == 0) {
+            if (mAddonsList.size == 0) {
                 findViewById<LinearLayout>(R.id.no_addons_found_msg).visibility = View.VISIBLE
             } else {
                 findViewById<LinearLayout>(R.id.no_addons_found_msg).visibility = View.GONE
             }
 
-            mAddonsListRecyclerView.adapter = AddonsAdapter(addonsList)
+            mAddonsListRecyclerView.adapter = AddonsAdapter(mAddonsList)
         } catch (e: IOException) {
             Timber.w(e.localizedMessage)
             UIUtils.showThemedToast(this, getString(R.string.is_not_valid_js_addon), false)
@@ -126,7 +144,30 @@ class AddonBrowser : NavigationDrawerActivity(), SubtitleListener {
 
     override fun onResume() {
         super.onResume()
-        listAddonsFromDir()
+        if (mBooleanExtra) {
+            fetchAddonsPackageJson()
+        } else {
+            listAddonsFromDir()
+        }
+    }
+
+    /**
+     * fetch anki-js-addon, containing info about each addons, then add to view with download tarball url
+     */
+    private fun fetchAddonsPackageJson() {
+        supportActionBar?.title = getString(R.string.download_addons)
+        showProgressBar()
+
+        // load items from anki-js-addon.json
+        try {
+            TaskManager.launchCollectionTask(
+                NpmPackageDownloader.GetAddonsPackageJson(this),
+                NpmPackageDownloader.GetAddonsPackageJsonListener(this, mAddonsListRecyclerView)
+            )
+        } catch (e: IOException) {
+            Timber.w(e.localizedMessage)
+            UIUtils.showThemedToast(this, getString(R.string.is_not_valid_js_addon), false)
+        }
     }
 
     override val subtitleText: String?
