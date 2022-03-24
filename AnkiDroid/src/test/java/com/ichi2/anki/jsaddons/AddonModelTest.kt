@@ -21,7 +21,6 @@ import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ichi2.anki.AnkiDroidApp
 import com.ichi2.anki.AnkiSerialization
-import com.ichi2.anki.R
 import com.ichi2.anki.RobolectricTest
 import com.ichi2.anki.jsaddons.AddonsConst.REVIEWER_ADDON
 import junit.framework.TestCase.*
@@ -34,8 +33,8 @@ import java.net.URL
 
 @RunWith(AndroidJUnit4::class)
 class AddonModelTest : RobolectricTest() {
-    private val NPM_PACKAGE_NAME = "valid-ankidroid-js-addon-test"
-    private val NOT_VALID_NPM_PACKAGE_NAME = "not-valid-ankidroid-js-addon-test"
+    private val VALID_NPM_PACKAGE_NAME_URL = "https://registry.npmjs.org/valid-ankidroid-js-addon-test/latest"
+    private val NOT_VALID_NPM_PACKAGE_NAME_URL = "https://registry.npmjs.org/not-valid-ankidroid-js-addon-test/latest"
 
     private lateinit var mPrefs: SharedPreferences
 
@@ -55,7 +54,7 @@ class AddonModelTest : RobolectricTest() {
         val mapper = AnkiSerialization.objectMapper
 
         // fetch package.json for the addon and read value to AddonModel
-        val addonModel: AddonModel = mapper.readValue(URL(targetContext.getString(R.string.npmjs_registry, NPM_PACKAGE_NAME)), AddonModel::class.java)
+        val addonModel: AddonModel = mapper.readValue(URL(VALID_NPM_PACKAGE_NAME_URL), AddonModel::class.java)
 
         // test addon is valid or not
         assertTrue(addonModel.isValidAnkiDroidAddon())
@@ -72,7 +71,7 @@ class AddonModelTest : RobolectricTest() {
         val mapper = AnkiSerialization.objectMapper
 
         // fetch package.json for the addon and read value to addonModel
-        val addonModel: AddonModel = mapper.readValue(URL(targetContext.getString(R.string.npmjs_registry, NOT_VALID_NPM_PACKAGE_NAME)), AddonModel::class.java)
+        val addonModel: AddonModel = mapper.readValue(URL(NOT_VALID_NPM_PACKAGE_NAME_URL), AddonModel::class.java)
 
         // test that it is not a valid addon for AnkiDroid
         assertFalse(addonModel.isValidAnkiDroidAddon())
@@ -88,7 +87,7 @@ class AddonModelTest : RobolectricTest() {
 
         // mapping for json fetched from http://registry.npmjs.org/ankidroid-js-addon-.../latest
         val mapper = AnkiSerialization.objectMapper
-        val addonModel: AddonModel = mapper.readValue(URL(targetContext.getString(R.string.npmjs_registry, NPM_PACKAGE_NAME)), AddonModel::class.java)
+        val addonModel: AddonModel = mapper.readValue(URL(VALID_NPM_PACKAGE_NAME_URL), AddonModel::class.java)
 
         // update the prefs make it enabled
         addonModel.updatePrefs(mPrefs, REVIEWER_ADDON, false)
