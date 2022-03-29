@@ -14,6 +14,11 @@
             android:id="@+id/nav_stats"
             android:icon="@drawable/ic_bar_chart_black"
             android:title="@string/statistics"/>
+        <item
+            android:id="@+id/nav_addons"
+            android:icon="@drawable/ic_baseline_extension_24"
+            android:title="@string/addons"
+            android:visible="@bool/anki_show_addon_menu" />
     </group>
     <group  android:id="@+id/group2">
         <item

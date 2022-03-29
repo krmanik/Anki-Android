@@ -56,7 +56,6 @@ class NpmPackageDownloader {
 
                 val mapper = AnkiSerialization.objectMapper
                 return mapper.readValue(url, object : TypeReference<MutableList<AddonModel>>() {})
-
             } catch (e: UnknownHostException) {
                 // user not connected to internet
                 Timber.w(e.localizedMessage)
@@ -70,8 +69,8 @@ class NpmPackageDownloader {
     }
 
     class GetAddonsPackageJsonListener(
-            private val activity: AnkiActivity,
-            private val addonsListRecyclerView: RecyclerView
+        private val activity: AnkiActivity,
+        private val addonsListRecyclerView: RecyclerView
     ) : TaskListener<Void?, MutableList<AddonModel>?>() {
         var context: Context = activity.applicationContext
         override fun onPreExecute() {
@@ -99,7 +98,7 @@ class NpmPackageDownloader {
      * @param tarballUrl
      */
     class DownloadAddon(private val context: Context, private val tarballUrl: String?) :
-            TaskDelegate<Void?, String?>() {
+        TaskDelegate<Void?, String?>() {
 
         override fun task(col: Collection, collectionTask: ProgressSenderAndCancelListener<Void?>): String {
             return downloadPackage()
@@ -119,13 +118,13 @@ class NpmPackageDownloader {
     }
 
     class DownloadAddonListener(
-            private val context: Context,
-            private val addonName: String?,
-            private val progressDialog: Dialog
+        private val context: Context,
+        private val addonName: String?,
+        private val progressDialog: Dialog
     ) : TaskListener<Void?, String?>() {
         override fun onPreExecute() {
             progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title).text =
-                    context.getString(R.string.downloading_npm_package)
+                context.getString(R.string.downloading_npm_package)
 
             progressDialog.findViewById<TextView>(R.id.progress_bar_layout_message).text = addonName
 
@@ -140,8 +139,8 @@ class NpmPackageDownloader {
             progressDialog.findViewById<TextView>(R.id.progress_bar_value_div).text = "1/3"
 
             TaskManager.launchCollectionTask(
-                    ExtractAddon(context, result!!, addonName!!),
-                    ExtractAddonListener(context, addonName, progressDialog)
+                ExtractAddon(context, result!!, addonName!!),
+                ExtractAddonListener(context, addonName, progressDialog)
             )
         }
     }
@@ -154,9 +153,9 @@ class NpmPackageDownloader {
      * @param addonName
      */
     class ExtractAddon(
-            private val context: Context,
-            private val tarballPath: String,
-            private val addonName: String,
+        private val context: Context,
+        private val tarballPath: String,
+        private val addonName: String,
     ) : TaskDelegate<Void?, String?>() {
 
         override fun task(col: Collection, collectionTask: ProgressSenderAndCancelListener<Void?>): String {
@@ -184,9 +183,8 @@ class NpmPackageDownloader {
 
             try {
 
-                NpmPackageTgzExtract.extractTarGzipToAddonFolder(tarballFile, addonsPackageDir)
+                TgzPackageExtract(context).extractTarGzipToAddonFolder(tarballFile, addonsPackageDir)
                 Timber.d("js addon .tgz extracted")
-
             } catch (e: IOException) {
                 Timber.w(e.localizedMessage)
                 return context.getString(R.string.failed_to_extract_addon_package, addonName)
@@ -201,14 +199,14 @@ class NpmPackageDownloader {
     }
 
     class ExtractAddonListener(
-            private val context: Context,
-            private val addonName: String,
-            private val progressDialog: Dialog
+        private val context: Context,
+        private val addonName: String,
+        private val progressDialog: Dialog
     ) : TaskListener<Void?, String?>() {
 
         override fun onPreExecute() {
             progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title).text =
-                    context.getString(R.string.extracting_npm_package)
+                context.getString(R.string.extracting_npm_package)
 
             progressDialog.findViewById<TextView>(R.id.progress_bar_layout_message).text = addonName
 
@@ -220,10 +218,10 @@ class NpmPackageDownloader {
         override fun onPostExecute(result: String?) {
             if (result.equals(context.getString(R.string.addon_install_complete, addonName))) {
                 progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title)
-                        .setText(R.string.success)
+                    .setText(R.string.success)
             } else {
                 progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title)
-                        .setText(R.string.failed)
+                    .setText(R.string.failed)
             }
 
             progressDialog.findViewById<TextView>(R.id.progress_bar_layout_message).text = result

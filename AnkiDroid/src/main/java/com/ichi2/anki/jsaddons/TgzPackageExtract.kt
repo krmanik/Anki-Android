@@ -111,7 +111,7 @@ class TgzPackageExtract(private val context: Context) {
 
         require(isGzip(tarballFile)) { context.getString(R.string.not_valid_js_addon, tarballFile.absolutePath) }
 
-        if (!addonsDir.exists()) {
+        if (!addonsDir.mkdirs()) {
             context.getString(R.string.could_not_create_dir, addonsDir.absolutePath)
         }
 

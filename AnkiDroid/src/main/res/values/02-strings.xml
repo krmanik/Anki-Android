@@ -440,4 +440,29 @@
     <!--  URL for getting package.json which contains addons info and download link -->
     <string name="ankidroid_js_addon_json">https://raw.githubusercontent.com/krmanik/anki-js-addon-json/main/anki-js-addon.json</string>
     <string name="error_occur_downloading_addon">Error occur in downloading packages json. Check network connection and try again</string>
+    <string name="addons">Addons</string>
+    <string name="javascript_addons">JavaScript Addons</string>
+    <string name="get_addons">Get Addons</string>
+    <string name="download_addons">Download Addons</string>
+    <string name="npm_package_name">NPM Package Name</string>
+    <string name="addon_version">Version</string>
+    <string name="ankidroid_js_api_version">AnkiDroid JS API Version</string>
+    <string name="addon_type" comment="Addon type reviewer or note-editor">Type </string>
+    <string name="addon_author">Author</string>
+    <string name="addon_license">License</string>
+    <string name="addon_homepage">Homepage</string>
+    <string name="addon_details">Details</string>
+    <string name="addon_type_and_version">Type: %1$s  Version: %2$s</string>
+    <string name="is_not_valid_js_addon">%s is not a valid js addon package for AnkiDroid</string>
+    <string name="downloading_npm_package">Downloading...</string>
+    <string name="extracting_npm_package">Extracting...</string>
+    <string name="failed_to_extract_addon_package">Failed to extract the %s addon package</string>
+    <string name="failed">Failed</string>
+    <string name="success">Success</string>
+    <string name="addon_install_complete">%s addon installation complete</string>
+    <string name="addon_enabled">%s addon enabled</string>
+    <string name="addon_disabled">%s addon disabled</string>
+    <string name="confirm_remove_addon">Do you want to remove %s ?</string>
+    <string name="failed_to_remove_addon">Failed to remove addon. Try again or remove it manually</string>
+    <string name="no_addons_found">No Addons found, Get addons from options menu</string>
 </resources>

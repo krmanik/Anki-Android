@@ -57,15 +57,15 @@ class AddonsDownloadAdapter(private var addonList: MutableList<AddonModel>) : Re
         holder.installButton.setOnClickListener {
 
             val progressDialog = Dialog(context as Activity)
-            progressDialog.setContentView(R.layout.addon_progress_bar_layout)
+            progressDialog.setContentView(R.layout.addon_progress_bar)
             progressDialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             progressDialog.setCancelable(false)
 
             // call another task which download .tgz file and extract and copy to addons folder
             // here result is tarBallUrl
             val cancellable = TaskManager.launchCollectionTask(
-                    NpmPackageDownloader.DownloadAddon(context as Activity, addonModel.dist!!["tarball"]),
-                    NpmPackageDownloader.DownloadAddonListener(context as Activity, addonModel.addonTitle, progressDialog)
+                NpmPackageDownloader.DownloadAddon(context as Activity, addonModel.dist!!["tarball"]),
+                NpmPackageDownloader.DownloadAddonListener(context as Activity, addonModel.name, progressDialog)
             )
 
             val cancelRunnable = Runnable {
