@@ -37,6 +37,7 @@ package com.ichi2.anki.jsaddons
 import android.content.Context
 import android.text.format.Formatter
 import com.ichi2.anki.R
+import com.ichi2.anki.UIUtils
 import com.ichi2.libanki.Utils
 import org.apache.commons.compress.archivers.ArchiveException
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
@@ -79,6 +80,11 @@ class TgzPackageExtract(private val context: Context) {
     private var total: Long = 0
     private var data = ByteArray(BUFFER)
 
+    private var progress = 0
+    private var numOfEntriesInTar = 0
+    private var unTarSizeForProgress = 0L
+    private var totalUnTarSize = 0L
+
     /**
      * Determine whether a file is a gzip.
      *
@@ -112,7 +118,8 @@ class TgzPackageExtract(private val context: Context) {
         require(isGzip(tarballFile)) { context.getString(R.string.not_valid_js_addon, tarballFile.absolutePath) }
 
         if (!addonsDir.mkdirs()) {
-            context.getString(R.string.could_not_create_dir, addonsDir.absolutePath)
+            UIUtils.showThemedToast(context, context.getString(R.string.could_not_create_dir, addonsDir.absolutePath), false)
+            return
         }
 
         // Make sure we have 2x the tar file size in free space (1x for tar file, 1x for unarchived tar file contents
@@ -129,6 +136,8 @@ class TgzPackageExtract(private val context: Context) {
 
         // Make sure we have sufficient free space
         val unTarSize = calculateUnTarSize(tarTempFile)
+        unTarSizeForProgress = unTarSize
+        totalUnTarSize = unTarSize
         if (unTarSize > availableSpace) {
             Timber.e("Not enough space to untar, need %d, available %d", unTarSize, availableSpace)
             throw IOException(context.getString(R.string.import_log_insufficient_space_error, Formatter.formatFileSize(context, unTarSize), Formatter.formatFileSize(context, availableSpace)))
@@ -270,12 +279,13 @@ class TgzPackageExtract(private val context: Context) {
 
                     bufferOutput.write(data, 0, count)
                     total += count
+                    unTarSizeForProgress -= count
 
                     // If space consumed is more than half of original availableSpace, delete file recursively and throw
                     enforceSpaceUsedLessThanHalfAvailable(outputDir)
 
                     // update progress
-                    updateExtractProgress()
+                    updateExtractProgress(unTarSizeForProgress)
                 }
 
                 if (total + BUFFER > TOO_BIG_SIZE) {
@@ -332,15 +342,14 @@ class TgzPackageExtract(private val context: Context) {
             ArchiveStreamFactory().createArchiveInputStream("tar", inputStream).use { tarInputStream ->
                 val tarInputStream1 = tarInputStream as TarArchiveInputStream
                 var entry: TarArchiveEntry? = tarInputStream1.nextEntry as TarArchiveEntry
-                var numOfEntries = 0
 
                 while (entry != null) {
-                    numOfEntries++
+                    numOfEntriesInTar++
                     unTarSize += entry.size
                     entry = tarInputStream.nextEntry as? TarArchiveEntry
                 }
 
-                if (numOfEntries > TOO_MANY_FILES) {
+                if (numOfEntriesInTar > TOO_MANY_FILES) {
                     throw IllegalStateException("Too many files to untar")
                 }
             }
@@ -364,6 +373,20 @@ class TgzPackageExtract(private val context: Context) {
         }
     }
 
-    private fun updateExtractProgress() {
+    /**
+     * Return progress in int value, the value can be used to display in view
+     * The progress will be in range of 0-100,
+     * where 0 means extract process started and 100 means the extract process completed,
+     *
+     * The progress is calculated
+     */
+    private fun updateExtractProgress(unTarSizeForProgress: Long): Int {
+        if (numOfEntriesInTar <= 0) {
+            return 0
+        }
+        //total
+
+        val progress = numOfEntriesInTar / 100
+        return 0
     }
 }
