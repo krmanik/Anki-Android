@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.ichi2.ui.FixedTextView
+        android:id="@+id/downloading_addon_title"
+        style="@style/TextAppearance.AppCompat.Headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        tools:text="This is how the title will look when a file with a long file name will be downloading" />
+    
+    <com.ichi2.ui.FixedTextView
+        android:id="@+id/download_dialog_info_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="@string/deck_download_progress_message"
+        android:gravity="center"/>
+    
+    <com.ichi2.ui.FixedTextView
+        android:id="@+id/download_percentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        tools:text="100 %" />
+
+    <ProgressBar
+        android:id="@+id/download_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleY="4"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
+
+    <com.ichi2.ui.FixedTextView
+        android:id="@+id/check_network_info_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="@string/check_network"
+        android:textColor="@color/material_red_500"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <android.widget.Button
+        android:id="@+id/cancel_addon_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel_download"
+        android:background="@color/material_red_500"
+        android:textColor="@color/white"
+        android:padding="8dp" />
+
+    <android.widget.Button
+        android:id="@+id/try_again_addon_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/try_again"
+        android:background="@color/material_blue_grey_500"
+        android:textColor="@color/white"
+        android:visibility="gone" />
+
+    <android.widget.Button
+        android:id="@+id/install_addon_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/import_deck"
+        android:background="@color/material_blue_500"
+        android:textColor="@color/white"
+        android:visibility="gone" />
+
+</LinearLayout>

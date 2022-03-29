@@ -17,20 +17,18 @@
 
 package com.ichi2.anki.jsaddons
 
-import android.app.Activity
-import android.app.Dialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.ichi2.anki.*
+import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.AnkiActivity.showDialogFragment
-import com.ichi2.async.TaskManager
+import com.ichi2.anki.AnkiDroidApp
+import com.ichi2.anki.R
 
 class AddonsDownloadAdapter(private var addonList: MutableList<AddonModel>) : RecyclerView.Adapter<AddonsDownloadAdapter.AddonsViewHolder>() {
     private var preferences: SharedPreferences? = null
@@ -55,29 +53,8 @@ class AddonsDownloadAdapter(private var addonList: MutableList<AddonModel>) : Re
         }
 
         holder.installButton.setOnClickListener {
-
-            val progressDialog = Dialog(context as Activity)
-            progressDialog.setContentView(R.layout.addon_progress_bar)
-            progressDialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            progressDialog.setCancelable(false)
-
-            // call another task which download .tgz file and extract and copy to addons folder
-            // here result is tarBallUrl
-            val cancellable = TaskManager.launchCollectionTask(
-                NpmPackageDownloader.DownloadAddon(context as Activity, addonModel.dist!!["tarball"]),
-                NpmPackageDownloader.DownloadAddonListener(context as Activity, addonModel.name, progressDialog)
-            )
-
-            val cancelRunnable = Runnable {
-                cancellable.cancel(true)
-                progressDialog.dismiss()
-            }
-
-            val cancelButton: Button = progressDialog.findViewById(R.id.cancel_action)
-            cancelButton.setText(R.string.dialog_cancel)
-            cancelButton.setOnClickListener { cancelRunnable.run() }
-
-            progressDialog.show()
+            val addonDownloadFragment = AddonsDownloadFragment(addonModel)
+            showDialogFragment(context as AnkiActivity?, addonDownloadFragment)
         }
     }
 

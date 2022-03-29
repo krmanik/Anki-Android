@@ -17,19 +17,17 @@
 
 package com.ichi2.anki.jsaddons
 
-import android.app.Dialog
 import android.content.Context
+import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.fasterxml.jackson.core.type.TypeReference
 import com.ichi2.anki.*
-import com.ichi2.anki.web.HttpFetcher
 import com.ichi2.async.ProgressSenderAndCancelListener
 import com.ichi2.async.TaskDelegate
 import com.ichi2.async.TaskListener
-import com.ichi2.async.TaskManager
 import com.ichi2.libanki.Collection
 import org.apache.commons.compress.archivers.ArchiveException
 import timber.log.Timber
@@ -92,60 +90,6 @@ class NpmPackageDownloader {
     }
 
     /**
-     * Download .tgz file from url
-     *
-     * @param context
-     * @param tarballUrl
-     */
-    class DownloadAddon(private val context: Context, private val tarballUrl: String?) :
-        TaskDelegate<Void?, String?>() {
-
-        override fun task(col: Collection, collectionTask: ProgressSenderAndCancelListener<Void?>): String {
-            return downloadPackage()
-        }
-
-        /**
-         * Download .tgz file from provided url
-         *
-         * @return downloaded file path
-         */
-        private fun downloadPackage(): String {
-            // download the .tgz file in cache folder of AnkiDroid
-            val downloadFilePath = HttpFetcher.downloadFileToSdCard(tarballUrl!!, context, "addons")
-            Timber.d("download path %s", downloadFilePath)
-            return downloadFilePath
-        }
-    }
-
-    class DownloadAddonListener(
-        private val context: Context,
-        private val addonName: String?,
-        private val progressDialog: Dialog
-    ) : TaskListener<Void?, String?>() {
-        override fun onPreExecute() {
-            progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title).text =
-                context.getString(R.string.downloading_npm_package)
-
-            progressDialog.findViewById<TextView>(R.id.progress_bar_layout_message).text = addonName
-
-            // progress bar max is 3, and it is start of first task
-            progressDialog.findViewById<ProgressBar>(R.id.progress_bar).progress = 0
-            progressDialog.findViewById<TextView>(R.id.progress_bar_value_div).text = "0/3"
-        }
-
-        override fun onPostExecute(result: String?) {
-            // extract the downloaded .tgz file to AnkiDroid/addons dir
-            progressDialog.findViewById<ProgressBar>(R.id.progress_bar).progress = 1
-            progressDialog.findViewById<TextView>(R.id.progress_bar_value_div).text = "1/3"
-
-            TaskManager.launchCollectionTask(
-                ExtractAddon(context, result!!, addonName!!),
-                ExtractAddonListener(context, addonName, progressDialog)
-            )
-        }
-    }
-
-    /**
      * Extract .tgz file, and copy to addons folder
      *
      * @param context
@@ -159,7 +103,7 @@ class NpmPackageDownloader {
     ) : TaskDelegate<Void?, String?>() {
 
         override fun task(col: Collection, collectionTask: ProgressSenderAndCancelListener<Void?>): String {
-            return extractAndCopyAddonTgz(tarballPath, addonName)
+            return extractAddonPackage(tarballPath, addonName)
         }
 
         /**
@@ -168,7 +112,7 @@ class NpmPackageDownloader {
          * @param tarballPath    path to downloaded js-addon.tgz file
          * @param npmPackageName addon name, e.g ankidroid-js-addon-progress-bar
          */
-        private fun extractAndCopyAddonTgz(tarballPath: String, npmPackageName: String): String {
+        private fun extractAddonPackage(tarballPath: String, npmPackageName: String): String {
             val currentAnkiDroidDirectory = CollectionHelper.getCurrentAnkiDroidDirectory(context)
 
             // AnkiDroid/addons/js-addons
@@ -201,38 +145,20 @@ class NpmPackageDownloader {
     class ExtractAddonListener(
         private val context: Context,
         private val addonName: String,
-        private val progressDialog: Dialog
+        private val view: View
     ) : TaskListener<Void?, String?>() {
 
         override fun onPreExecute() {
-            progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title).text =
-                context.getString(R.string.extracting_npm_package)
-
-            progressDialog.findViewById<TextView>(R.id.progress_bar_layout_message).text = addonName
-
-            // progress bar max is 3, and it is start of final task so progress bar set to 2
-            progressDialog.findViewById<ProgressBar>(R.id.progress_bar).progress = 2
-            progressDialog.findViewById<TextView>(R.id.progress_bar_value_div).text = "2/3"
+            view.findViewById<TextView>(R.id.download_percentage).text = "0"
+            view.findViewById<ProgressBar>(R.id.download_progress).progress = 0
+            view.findViewById<TextView>(R.id.downloading_addon_title).text = "Extracting...$addonName"
         }
 
         override fun onPostExecute(result: String?) {
             if (result.equals(context.getString(R.string.addon_install_complete, addonName))) {
-                progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title)
-                    .setText(R.string.success)
-            } else {
-                progressDialog.findViewById<TextView>(R.id.progress_bar_layout_title)
-                    .setText(R.string.failed)
+                view.findViewById<Button>(R.id.cancel_addon_download).visibility = View.GONE
+                view.findViewById<Button>(R.id.install_addon_btn).visibility = View.GONE
             }
-
-            progressDialog.findViewById<TextView>(R.id.progress_bar_layout_message).text = result
-
-            // progress bar max is 3, and it is third and final task so progress bar set to 3
-            progressDialog.findViewById<ProgressBar>(R.id.progress_bar).progress = 3
-            progressDialog.findViewById<TextView>(R.id.progress_bar_value_div).text = "3/3"
-
-            val okButton: Button = progressDialog.findViewById(R.id.cancel_action)
-            okButton.setText(R.string.dialog_ok)
-            okButton.setOnClickListener { progressDialog.dismiss() }
         }
     }
 }

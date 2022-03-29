@@ -17,6 +17,8 @@
 
 package com.ichi2.anki.jsaddons
 
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -47,6 +49,7 @@ class AddonsBrowser : NavigationDrawerActivity(), SubtitleListener {
     private lateinit var mAddonsListRecyclerView: RecyclerView
     private val GET_ADDONS = "get_addons"
     private var mBooleanExtra: Boolean = false
+    lateinit var downloadManager: DownloadManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (showedActivityFailedScreen(savedInstanceState)) {
@@ -75,6 +78,8 @@ class AddonsBrowser : NavigationDrawerActivity(), SubtitleListener {
         } else {
             listAddonsFromDir()
         }
+
+        downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
     }
 
     /**

@@ -273,6 +273,9 @@ class TgzPackageExtract(private val context: Context) {
 
                     // If space consumed is more than half of original availableSpace, delete file recursively and throw
                     enforceSpaceUsedLessThanHalfAvailable(outputDir)
+
+                    // update progress
+                    updateExtractProgress()
                 }
 
                 if (total + BUFFER > TOO_BIG_SIZE) {
@@ -359,5 +362,8 @@ class TgzPackageExtract(private val context: Context) {
             outputDir.deleteRecursively()
             throw ArchiveException(context.getString(R.string.file_extract_exceeds_storage_space))
         }
+    }
+
+    private fun updateExtractProgress() {
     }
 }
