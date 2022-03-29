@@ -436,4 +436,8 @@
     <string name="malicious_archive_entry_outside">Malicious archive. Contains entry outside of the target dir: %s</string>
     <string name="malicious_archive_exceeds_limit">Malicious archive. Size exceeds 100MB or contains more than 1024 files</string>
     <string name="file_extract_exceeds_storage_space">File extract exceeds storage space</string>
+
+    <!--  URL for getting package.json which contains addons info and download link -->
+    <string name="ankidroid_js_addon_json">https://raw.githubusercontent.com/krmanik/anki-js-addon-json/main/anki-js-addon.json</string>
+    <string name="error_occur_downloading_addon">Error occur in downloading packages json. Check network connection and try again</string>
 </resources>
