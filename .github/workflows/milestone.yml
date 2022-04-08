@@ -6,17 +6,19 @@ on:
 
 jobs:
   milestone:
-    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.milestone == null }}
-    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.event.pull_request.milestone == null
     permissions:
       contents: read
       issues: write
-      pull-requests: write
+      pull-requests: write    
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Add to milestone
-      run: |
-        curl --request PATCH \
-        --url ${{ github.event.pull_request.issue_url }} \
-        --header 'authorization: token ${{ secrets.GITHUB_TOKEN }}' \
-        --data '{"milestone": 42}'
+    - uses: actions/github-script@v6
+      with:
+        script: |
+          await github.rest.issues.update({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: ${{ github.event.pull_request.number }},
+            milestone: 42
+          });
