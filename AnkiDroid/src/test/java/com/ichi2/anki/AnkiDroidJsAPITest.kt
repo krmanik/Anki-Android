@@ -332,7 +332,7 @@ class AnkiDroidJsAPITest : RobolectricTest() {
         val cardId = javaScriptFunction.ankiGetCardId()
 
         // test that card rescheduled for 15 days interval and returned true
-        assertTrue("Card rescheduled, so returns true", javaScriptFunction.ankiSetCardDue(15))
+        assertTrue("Card rescheduled, so returns true", javaScriptFunction.ankiSetCardDue(15, false))
         waitForAsyncTasksToComplete()
 
         // verify that it did get rescheduled

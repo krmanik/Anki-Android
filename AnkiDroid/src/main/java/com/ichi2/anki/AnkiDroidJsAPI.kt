@@ -520,7 +520,7 @@ open class AnkiDroidJsAPI(private val activity: AbstractFlashcardViewer) {
     }
 
     @JavascriptInterface
-    open fun ankiSetCardDue(days: Int): Boolean {
+    open fun ankiSetCardDue(days: Int, reset: Boolean): Boolean {
         // the function is overridden in Reviewer.kt
         // it may be called in previewer so just return true value here
         return true

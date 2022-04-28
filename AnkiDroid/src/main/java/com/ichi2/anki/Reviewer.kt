@@ -1536,19 +1536,22 @@ open class Reviewer : AbstractFlashcardViewer() {
         }
 
         @JavascriptInterface
-        override fun ankiSetCardDue(days: Int): Boolean {
+        override fun ankiSetCardDue(days: Int, reset: Boolean): Boolean {
             val apiList = getJsApiListMap()!!
             if (!apiList[SET_CARD_DUE]!!) {
                 showDeveloperContact(ankiJsErrorCodeDefault)
                 return false
             }
 
-            if (days < 1 || days > 9999) {
+            if (days < 0 || days > 9999) {
                 showDeveloperContact(ankiJsErrorCodeSetDue)
                 return false
             }
 
             val cardIds = listOf(currentCard!!.id)
+            if (reset) {
+                ResetCards(cardIds).runWithHandler(scheduleCollectionTaskHandler(R.plurals.reset_cards_dialog_acknowledge))
+            }
             RescheduleCards(cardIds, days).runWithHandler(scheduleCollectionTaskHandler(R.plurals.reschedule_cards_dialog_acknowledge))
             return true
         }
