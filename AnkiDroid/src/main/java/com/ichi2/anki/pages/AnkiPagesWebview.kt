@@ -38,7 +38,7 @@ class AnkiPagesWebview : AnkiActivity() {
         webview.settings.javaScriptEnabled = true
         webview.settings.allowFileAccess = true
         webview.webChromeClient = WebChromeClient()
-        webview.loadUrl("http://127.0.0.1:$port/graphs.html")
+        webview.loadUrl("http://127.0.0.1:$port/import-csv.html")
     }
 
     // start server

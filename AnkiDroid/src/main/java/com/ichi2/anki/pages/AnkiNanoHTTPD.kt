@@ -60,6 +60,8 @@ class AnkiNanoHTTPD : NanoHTTPD {
         }
 
         if (method == Method.POST) {
+            Timber.d("Requested %s", uri)
+
             when (uri) {
                 "/_anki/i18nResources" -> {
                     val contentLength = session.headers["content-length"]!!.toInt()
@@ -90,6 +92,30 @@ class AnkiNanoHTTPD : NanoHTTPD {
                         Response.Status.OK,
                         mime,
                         ByteArrayInputStream(col?.newBackend?.graphsRaw(bytes))
+                    )
+                }
+                "/_anki/getNotetypeNames" -> {
+                    val contentLength = session.headers["content-length"]!!.toInt()
+                    val bytes = ByteArray(contentLength)
+                    session.inputStream.read(bytes, 0, contentLength)
+                    Timber.d("RequestBody: " + String(bytes))
+
+                    return newChunkedResponse(
+                        Response.Status.OK,
+                        mime,
+                        ByteArrayInputStream(col?.backend?.getNotetypeNamesRaw(bytes))
+                    )
+                }
+                "/_anki/getDeckNames" -> {
+                    val contentLength = session.headers["content-length"]!!.toInt()
+                    val bytes = ByteArray(contentLength)
+                    session.inputStream.read(bytes, 0, contentLength)
+                    Timber.d("RequestBody: " + String(bytes))
+
+                    return newChunkedResponse(
+                        Response.Status.OK,
+                        mime,
+                        ByteArrayInputStream(col?.backend?.getDeckNamesRaw(bytes))
                     )
                 }
             }
