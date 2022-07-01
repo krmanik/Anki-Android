@@ -315,6 +315,8 @@ dependencies {
     // build via AnkiDroidApp.
     implementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+
     api project(":api")
 
     testImplementation "org.junit.vintage:junit-vintage-engine:$junit_version"

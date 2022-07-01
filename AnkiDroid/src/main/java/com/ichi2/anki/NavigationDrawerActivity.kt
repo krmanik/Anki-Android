@@ -42,6 +42,7 @@ import com.drakeet.drawer.FullDraggableContainer
 import com.google.android.material.navigation.NavigationView
 import com.ichi2.anim.ActivityTransitionAnimation.Direction.*
 import com.ichi2.anki.dialogs.HelpDialog
+import com.ichi2.anki.pages.AnkiPagesWebview
 import com.ichi2.themes.Themes
 import com.ichi2.utils.HandlerUtils
 import com.ichi2.utils.KotlinCleanup
@@ -295,7 +296,10 @@ abstract class NavigationDrawerActivity :
                 openCardBrowser()
             } else if (itemId == R.id.nav_stats) {
                 Timber.i("Navigating to stats")
-                val intent = Intent(this@NavigationDrawerActivity, Statistics::class.java)
+                // val intent = Intent(this@NavigationDrawerActivity, Statistics::class.java)
+                // startActivityForResultWithAnimation(intent, REQUEST_STATISTICS, START)
+                val intent = Intent(this@NavigationDrawerActivity, AnkiPagesWebview::class.java)
+                intent.putExtra("cardId", currentCardId)
                 startActivityForResultWithAnimation(intent, REQUEST_STATISTICS, START)
             } else if (itemId == R.id.nav_settings) {
                 Timber.i("Navigating to settings")
