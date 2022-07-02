@@ -19,6 +19,7 @@ package com.ichi2.anki.pages
 import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.R
 import timber.log.Timber
@@ -27,18 +28,26 @@ import java.net.ServerSocket
 
 class AnkiPagesWebview : AnkiActivity() {
     private lateinit var ankiServer: AnkiNanoHTTPD
+    private lateinit var webview: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.anki_pages_webview)
-        val webview: WebView = findViewById(R.id.anki_wb)
+        webview = findViewById(R.id.anki_wb)
 
         val port = startServer()
 
         webview.settings.javaScriptEnabled = true
         webview.settings.allowFileAccess = true
         webview.webChromeClient = WebChromeClient()
+        webview.webViewClient = AnkiWebChromeClient()
         webview.loadUrl("http://127.0.0.1:$port/import-csv.html")
+    }
+
+    class AnkiWebChromeClient() : WebViewClient() {
+        override fun onPageFinished(view: WebView?, url: String?) {
+            view?.evaluateJavascript("anki.setupImportCsvPage('/data/user/0/com.ichi2.anki/cache/test.csv');", null)
+        }
     }
 
     // start server
@@ -53,13 +62,6 @@ class AnkiPagesWebview : AnkiActivity() {
     @Throws(IOException::class)
     private fun getAvailablePort(): Int {
         ServerSocket(0).use { socket -> return socket.localPort }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (ankiServer.isAlive) {
-            ankiServer.stop()
-        }
     }
 
     override fun onDestroy() {

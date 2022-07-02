@@ -19,8 +19,8 @@ package com.ichi2.anki.pages
 import android.content.Context
 import android.content.SharedPreferences
 import com.ichi2.libanki.Collection
-import com.ichi2.libanki.stats.getGraphPreferencesRaw
-import com.ichi2.libanki.stats.graphsRaw
+import com.ichi2.libanki.importer.*
+import com.ichi2.libanki.stats.*
 import fi.iki.elonen.NanoHTTPD
 import timber.log.Timber
 import java.io.ByteArrayInputStream
@@ -103,7 +103,7 @@ class AnkiNanoHTTPD : NanoHTTPD {
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
-                        ByteArrayInputStream(col?.backend?.getNotetypeNamesRaw(bytes))
+                        ByteArrayInputStream(col?.newBackend?.getNotetypeNamesRaw(bytes))
                     )
                 }
                 "/_anki/getDeckNames" -> {
@@ -115,7 +115,43 @@ class AnkiNanoHTTPD : NanoHTTPD {
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
-                        ByteArrayInputStream(col?.backend?.getDeckNamesRaw(bytes))
+                        ByteArrayInputStream(col?.newBackend?.getDeckNamesRaw(bytes))
+                    )
+                }
+                "/_anki/getCsvMetadata" -> {
+                    val contentLength = session.headers["content-length"]!!.toInt()
+                    val bytes = ByteArray(contentLength)
+                    session.inputStream.read(bytes, 0, contentLength)
+                    Timber.d("RequestBody: " + String(bytes))
+
+                    return newChunkedResponse(
+                        Response.Status.OK,
+                        mime,
+                        ByteArrayInputStream(col?.newBackend?.getCsvMetadataRaw(bytes))
+                    )
+                }
+                "/_anki/importCsv" -> {
+                    val contentLength = session.headers["content-length"]!!.toInt()
+                    val bytes = ByteArray(contentLength)
+                    session.inputStream.read(bytes, 0, contentLength)
+                    Timber.d("RequestBody: " + String(bytes))
+
+                    return newChunkedResponse(
+                        Response.Status.OK,
+                        mime,
+                        ByteArrayInputStream(col?.newBackend?.importCsvRaw(bytes))
+                    )
+                }
+                "/_anki/getFieldNames " -> {
+                    val contentLength = session.headers["content-length"]!!.toInt()
+                    val bytes = ByteArray(contentLength)
+                    session.inputStream.read(bytes, 0, contentLength)
+                    Timber.d("RequestBody: " + String(bytes))
+
+                    return newChunkedResponse(
+                        Response.Status.OK,
+                        mime,
+                        ByteArrayInputStream(col?.newBackend?.getFieldNamesRaw(bytes))
                     )
                 }
             }
