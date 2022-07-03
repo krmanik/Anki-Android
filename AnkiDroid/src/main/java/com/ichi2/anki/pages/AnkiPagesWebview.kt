@@ -19,6 +19,7 @@ package com.ichi2.anki.pages
 import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.R
 import timber.log.Timber
@@ -28,6 +29,7 @@ import java.net.ServerSocket
 class AnkiPagesWebview : AnkiActivity() {
     private lateinit var ankiServer: AnkiNanoHTTPD
     private lateinit var webview: WebView
+    val SELECT_CSV_FILE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,7 @@ class AnkiPagesWebview : AnkiActivity() {
         webview.settings.javaScriptEnabled = true
         webview.settings.allowFileAccess = true
         webview.webChromeClient = WebChromeClient()
+        webview.webViewClient = AnkiWebChromeClient()
         webview.loadUrl("http://127.0.0.1:$port/import-csv.html")
     }
 
@@ -60,6 +63,13 @@ class AnkiPagesWebview : AnkiActivity() {
         super.onDestroy()
         if (ankiServer.isAlive) {
             ankiServer.stop()
+        }
+    }
+
+    class AnkiWebChromeClient() : WebViewClient() {
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            view?.evaluateJavascript("anki.setupImportCsvPage('/data/user/0/com.ichi2.anki/cache/test.csv');", null)
         }
     }
 }
