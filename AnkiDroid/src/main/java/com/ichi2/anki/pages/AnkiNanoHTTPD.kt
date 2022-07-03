@@ -142,7 +142,7 @@ class AnkiNanoHTTPD : NanoHTTPD {
                         ByteArrayInputStream(col?.newBackend?.importCsvRaw(bytes))
                     )
                 }
-                "/_anki/getFieldNames " -> {
+                "/_anki/getFieldNames" -> {
                     val contentLength = session.headers["content-length"]!!.toInt()
                     val bytes = ByteArray(contentLength)
                     session.inputStream.read(bytes, 0, contentLength)

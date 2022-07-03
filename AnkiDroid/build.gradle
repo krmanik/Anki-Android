@@ -273,15 +273,8 @@ dependencies {
     if (project.rootProject.file('local.properties').exists()) {
         localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
     }
-    if (localProperties['local_backend'] == "true") {
-        implementation files("../../Anki-Android-Backend/rsdroid/build/outputs/aar/rsdroid-release.aar")
-        testImplementation files("../../Anki-Android-Backend/rsdroid-testing/build/libs/rsdroid-testing-${ankidroid_backend_version}.jar")
-        // On Windows, you can use something like
-        // implementation files("C:\\GitHub\\Rust-Test\\rsdroid\\build\\outputs\\aar\\rsdroid-release.aar")
-    } else {
-        implementation "io.github.david-allison-1:anki-android-backend:$ankidroid_backend_version"
-        testImplementation "io.github.david-allison-1:anki-android-backend-testing:$ankidroid_backend_version"
-    }
+
+    implementation files("C:\\rsdroid\\rsdroid-release.aar")
 
     // A path for a testing library which provide Parameterized Test
     testImplementation "org.junit.jupiter:junit-jupiter:$junit_version"
