@@ -300,6 +300,7 @@ abstract class NavigationDrawerActivity :
                 // startActivityForResultWithAnimation(intent, REQUEST_STATISTICS, START)
                 val intent = Intent(this@NavigationDrawerActivity, AnkiPagesWebview::class.java)
                 intent.putExtra("cardId", currentCardId)
+                intent.putExtra("web_page", "graphs")
                 startActivityForResultWithAnimation(intent, REQUEST_STATISTICS, START)
             } else if (itemId == R.id.nav_settings) {
                 Timber.i("Navigating to settings")

@@ -64,11 +64,7 @@ class AnkiNanoHTTPD : NanoHTTPD {
 
             when (uri) {
                 "/_anki/i18nResources" -> {
-                    val contentLength = session.headers["content-length"]!!.toInt()
-                    val bytes = ByteArray(contentLength)
-                    session.inputStream.read(bytes, 0, contentLength)
-                    Timber.d("RequestBody: " + String(bytes))
-
+                    val bytes = getSessionBytes(session)
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
@@ -82,12 +78,16 @@ class AnkiNanoHTTPD : NanoHTTPD {
                         ByteArrayInputStream(col?.newBackend?.getGraphPreferencesRaw())
                     )
                 }
+                "/_anki/setGraphPreferences" -> {
+                    val bytes = getSessionBytes(session)
+                    return newChunkedResponse(
+                        Response.Status.OK,
+                        mime,
+                        ByteArrayInputStream(col?.newBackend?.setGraphPreferencesRaw(bytes))
+                    )
+                }
                 "/_anki/graphs" -> {
-                    val contentLength = session.headers["content-length"]!!.toInt()
-                    val bytes = ByteArray(contentLength)
-                    session.inputStream.read(bytes, 0, contentLength)
-                    Timber.d("RequestBody: " + String(bytes))
-
+                    val bytes = getSessionBytes(session)
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
@@ -95,11 +95,7 @@ class AnkiNanoHTTPD : NanoHTTPD {
                     )
                 }
                 "/_anki/getNotetypeNames" -> {
-                    val contentLength = session.headers["content-length"]!!.toInt()
-                    val bytes = ByteArray(contentLength)
-                    session.inputStream.read(bytes, 0, contentLength)
-                    Timber.d("RequestBody: " + String(bytes))
-
+                    val bytes = getSessionBytes(session)
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
@@ -107,11 +103,7 @@ class AnkiNanoHTTPD : NanoHTTPD {
                     )
                 }
                 "/_anki/getDeckNames" -> {
-                    val contentLength = session.headers["content-length"]!!.toInt()
-                    val bytes = ByteArray(contentLength)
-                    session.inputStream.read(bytes, 0, contentLength)
-                    Timber.d("RequestBody: " + String(bytes))
-
+                    val bytes = getSessionBytes(session)
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
@@ -119,11 +111,7 @@ class AnkiNanoHTTPD : NanoHTTPD {
                     )
                 }
                 "/_anki/getCsvMetadata" -> {
-                    val contentLength = session.headers["content-length"]!!.toInt()
-                    val bytes = ByteArray(contentLength)
-                    session.inputStream.read(bytes, 0, contentLength)
-                    Timber.d("RequestBody: " + String(bytes))
-
+                    val bytes = getSessionBytes(session)
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
@@ -131,11 +119,7 @@ class AnkiNanoHTTPD : NanoHTTPD {
                     )
                 }
                 "/_anki/importCsv" -> {
-                    val contentLength = session.headers["content-length"]!!.toInt()
-                    val bytes = ByteArray(contentLength)
-                    session.inputStream.read(bytes, 0, contentLength)
-                    Timber.d("RequestBody: " + String(bytes))
-
+                    val bytes = getSessionBytes(session)
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
@@ -143,20 +127,31 @@ class AnkiNanoHTTPD : NanoHTTPD {
                     )
                 }
                 "/_anki/getFieldNames" -> {
-                    val contentLength = session.headers["content-length"]!!.toInt()
-                    val bytes = ByteArray(contentLength)
-                    session.inputStream.read(bytes, 0, contentLength)
-                    Timber.d("RequestBody: " + String(bytes))
-
+                    val bytes = getSessionBytes(session)
                     return newChunkedResponse(
                         Response.Status.OK,
                         mime,
                         ByteArrayInputStream(col?.newBackend?.getFieldNamesRaw(bytes))
                     )
                 }
+                "/_anki/cardStats" -> {
+                    val bytes = getSessionBytes(session)
+                    return newChunkedResponse(
+                        Response.Status.OK,
+                        mime,
+                        ByteArrayInputStream(col?.newBackend?.cardStatsRaw(bytes))
+                    )
+                }
             }
         }
 
         return newFixedLengthResponse("")
+    }
+
+    private fun getSessionBytes(session: IHTTPSession): ByteArray {
+        val contentLength = session.headers["content-length"]!!.toInt()
+        val bytes = ByteArray(contentLength)
+        session.inputStream.read(bytes, 0, contentLength)
+        return bytes
     }
 }

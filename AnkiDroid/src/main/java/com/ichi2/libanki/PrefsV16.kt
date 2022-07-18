@@ -14,27 +14,16 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
  ****************************************************************************************/
 
-package com.ichi2.libanki.stats
+package com.ichi2.libanki
 
 // These take and return bytes that the frontend TypeScript code will encode/decode.
 
-import com.ichi2.libanki.CollectionV16
-
-fun CollectionV16.cardStatsRaw(input: ByteArray): ByteArray {
-    return backend.cardStatsRaw(input)
-}
-
-fun CollectionV16.graphsRaw(input: ByteArray): ByteArray {
-    return backend.graphsRaw(input)
-}
-
-fun CollectionV16.getGraphPreferencesRaw(): ByteArray {
-    val prefs = backend.getGraphPreferences().toBuilder()
-        .setBrowserLinksSupported(false)
+fun CollectionV16.getPreferencesRaw(): ByteArray {
+    val prefs = backend.getPreferences().toBuilder()
         .build()
     return prefs.toByteArray()
 }
 
-fun CollectionV16.setGraphPreferencesRaw(input: ByteArray): ByteArray {
-    return backend.setGraphPreferencesRaw(input)
+fun CollectionV16.setPreferencesRaw(input: ByteArray): ByteArray {
+    return backend.setPreferencesRaw(input)
 }

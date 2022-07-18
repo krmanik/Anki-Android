@@ -22,6 +22,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.R
+import com.ichi2.themes.Themes
 import timber.log.Timber
 import java.io.IOException
 import java.net.ServerSocket
@@ -29,7 +30,6 @@ import java.net.ServerSocket
 class AnkiPagesWebview : AnkiActivity() {
     private lateinit var ankiServer: AnkiNanoHTTPD
     private lateinit var webview: WebView
-    val SELECT_CSV_FILE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,12 +37,14 @@ class AnkiPagesWebview : AnkiActivity() {
         webview = findViewById(R.id.anki_wb)
 
         val port = startServer()
+        val webPageName: String = intent.getStringExtra("web_page").toString()
+        val cardId: Long = intent.getLongExtra("cardId", -1)
+        val nightMode = if (Themes.currentTheme.isNightMode) "#night" else ""
 
         webview.settings.javaScriptEnabled = true
-        webview.settings.allowFileAccess = true
         webview.webChromeClient = WebChromeClient()
-        webview.webViewClient = AnkiWebChromeClient()
-        webview.loadUrl("http://127.0.0.1:$port/import-csv.html")
+        webview.webViewClient = AnkiWebChromeClient(webPageName, cardId, path = "") // currently empty, needs to take path from file picker
+        webview.loadUrl("http://127.0.0.1:$port/$webPageName.html$nightMode")
     }
 
     // start server
@@ -66,10 +68,17 @@ class AnkiPagesWebview : AnkiActivity() {
         }
     }
 
-    class AnkiWebChromeClient() : WebViewClient() {
+    class AnkiWebChromeClient(private val webPageName: String, private val cardId: Long, private val path: String) : WebViewClient() {
         override fun onPageFinished(view: WebView?, url: String?) {
             super.onPageFinished(view, url)
-            view?.evaluateJavascript("anki.setupImportCsvPage('/data/user/0/com.ichi2.anki/cache/test.csv');", null)
+            if (webPageName == "import-csv") {
+                view?.evaluateJavascript("anki.setupImportCsvPage('$path');", null)
+            }
+
+            if (webPageName == "card-info") {
+                view?.evaluateJavascript("anki.cardInfoPromise = anki.setupCardInfo(document.body);", null)
+                view?.evaluateJavascript("anki.cardInfoPromise.then((c) => c.\$set({cardId: $cardId}));", null)
+            }
         }
     }
 }
