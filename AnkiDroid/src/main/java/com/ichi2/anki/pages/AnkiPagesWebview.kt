@@ -39,11 +39,12 @@ class AnkiPagesWebview : AnkiActivity() {
         val port = startServer()
         val webPageName: String = intent.getStringExtra("web_page").toString()
         val cardId: Long = intent.getLongExtra("cardId", -1)
+        val path: String = intent.getStringExtra("csv_path").toString()
         val nightMode = if (Themes.currentTheme.isNightMode) "#night" else ""
 
         webview.settings.javaScriptEnabled = true
         webview.webChromeClient = WebChromeClient()
-        webview.webViewClient = AnkiWebChromeClient(webPageName, cardId, path = "") // currently empty, needs to take path from file picker
+        webview.webViewClient = AnkiWebChromeClient(webPageName, cardId, path)
         webview.loadUrl("http://127.0.0.1:$port/$webPageName.html$nightMode")
     }
 

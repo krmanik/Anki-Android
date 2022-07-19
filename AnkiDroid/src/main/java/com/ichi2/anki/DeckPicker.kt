@@ -770,6 +770,11 @@ open class DeckPicker :
             if (!importResult.isSuccess) {
                 ImportUtils.showImportUnsuccessfulDialog(this, importResult.humanReadableMessage, false)
             }
+        } else if (requestCode == PICK_TEXT_FILE && resultCode == RESULT_OK) {
+            val importResult = ImportUtils.handleFileImport(this, data!!)
+            if (!importResult.isSuccess) {
+                ImportUtils.showImportUnsuccessfulDialog(this, importResult.humanReadableMessage, false)
+            }
         }
     }
 
@@ -2550,6 +2555,7 @@ open class DeckPicker :
         const val SHOW_STUDYOPTIONS = 11
         private const val ADD_NOTE = 12
         const val PICK_APKG_FILE = 13
+        const val PICK_TEXT_FILE = 14
 
         // For automatic syncing
         // 10 minutes in milliseconds.

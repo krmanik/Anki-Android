@@ -37,13 +37,19 @@ class ImportFileSelectionFragment {
             // this needs a deckPicker for now. See use of PICK_APKG_FILE
 
             // This is required for serialization of the lambda
-            class OpenFilePicker(var multiple: Boolean = false) : FunctionItem.ActivityConsumer {
+            class OpenFilePicker(var multiple: Boolean = false, var text: Boolean = false) : FunctionItem.ActivityConsumer {
                 override fun consume(activity: AnkiActivity) {
-                    openImportFilePicker(activity, multiple)
+                    openImportFilePicker(activity, multiple, text)
                 }
             }
 
             val importItems = arrayListOf<RecursivePictureMenu.Item>(
+                FunctionItem(
+                    R.string.import_text_file,
+                    R.drawable.ic_manual_black_24dp,
+                    UsageAnalytics.Actions.IMPORT_TEXT_FILE,
+                    OpenFilePicker()
+                ),
                 FunctionItem(
                     R.string.import_deck_package,
                     R.drawable.ic_manual_black_24dp,
@@ -62,7 +68,7 @@ class ImportFileSelectionFragment {
 
         // needs to be static for serialization
         @JvmStatic
-        fun openImportFilePicker(activity: AnkiActivity, multiple: Boolean = false) {
+        fun openImportFilePicker(activity: AnkiActivity, multiple: Boolean = false, text: Boolean = false) {
             Timber.d("openImportFilePicker() delegating to file picker intent")
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -71,7 +77,9 @@ class ImportFileSelectionFragment {
             intent.putExtra("android.content.extra.FANCY", true)
             intent.putExtra("android.content.extra.SHOW_FILESIZE", true)
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple)
-            activity.startActivityForResultWithoutAnimation(intent, DeckPicker.PICK_APKG_FILE)
+
+            val apkgFile = if (text) DeckPicker.PICK_TEXT_FILE else DeckPicker.PICK_APKG_FILE
+            activity.startActivityForResultWithoutAnimation(intent, apkgFile)
         }
     }
 }

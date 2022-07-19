@@ -449,6 +449,9 @@ object UsageAnalytics {
         val EXCEPTION_REPORT = "Exception Report"
 
         @AnalyticsConstant
+        val IMPORT_TEXT_FILE = "Import TEXT"
+
+        @AnalyticsConstant
         val IMPORT_APKG_FILE = "Import APKG"
 
         @AnalyticsConstant
