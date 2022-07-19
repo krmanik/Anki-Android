@@ -64,6 +64,7 @@ import com.ichi2.anki.dialogs.RescheduleDialog.rescheduleSingleCard
 import com.ichi2.anki.multimediacard.AudioView
 import com.ichi2.anki.multimediacard.AudioView.Companion.createRecorderInstance
 import com.ichi2.anki.multimediacard.AudioView.Companion.generateTempAudioFile
+import com.ichi2.anki.pages.AnkiPagesWebview
 import com.ichi2.anki.reviewer.*
 import com.ichi2.anki.reviewer.AnswerButtons.Companion.getBackgroundColors
 import com.ichi2.anki.reviewer.AnswerButtons.Companion.getTextColors
@@ -688,10 +689,11 @@ open class Reviewer : AbstractFlashcardViewer() {
             showThemedToast(this, getString(R.string.multimedia_editor_something_wrong), true)
             return
         }
-        val intent = Intent(this, CardInfo::class.java)
+        val intent = Intent(this, AnkiPagesWebview::class.java)
         val animation = getAnimationTransitionFromGesture(fromGesture)
         intent.putExtra("cardId", mCurrentCard!!.id)
         intent.putExtra(FINISH_ANIMATION_EXTRA, getInverseTransition(animation) as Parcelable)
+        intent.putExtra("web_page", "card-info")
         startActivityWithAnimation(intent, animation)
     }
 

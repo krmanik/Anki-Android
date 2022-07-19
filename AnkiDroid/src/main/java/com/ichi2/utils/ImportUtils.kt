@@ -31,8 +31,10 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.AnkiDroidApp
 import com.ichi2.anki.CrashReportService
+import com.ichi2.anki.DeckPicker.Companion.PICK_TEXT_FILE
 import com.ichi2.anki.R
 import com.ichi2.anki.dialogs.DialogHandler
+import com.ichi2.anki.pages.AnkiPagesWebview
 import com.ichi2.compat.CompatHelper
 import org.apache.commons.compress.archivers.zip.ZipFile
 import org.jetbrains.annotations.Contract
@@ -76,7 +78,7 @@ object ImportUtils {
     @JvmStatic
     @Contract("null -> false")
     fun isValidPackageName(filename: String?): Boolean {
-        return FileImporter.isDeckPackage(filename) || isCollectionPackage(filename)
+        return FileImporter.isDeckPackage(filename) || isCollectionPackage(filename) || FileImporter.isTextFile(filename)
     }
 
     /**
@@ -178,6 +180,24 @@ object ImportUtils {
                         // Don't import if file doesn't have an Anki package extension
                         ImportResult.fromErrorString(context.resources.getString(R.string.import_error_not_apkg_extension, filename))
                     }
+                } else if (isTextFile(filename)) {
+                    // Copy to temporary file
+                    filename = ensureValidLength(filename)
+                    val tempOutDir = Uri.fromFile(File(context.cacheDir, filename)).encodedPath!!
+                    val errorMessage = if (copyFileToCache(context, data, tempOutDir)) null else context.getString(R.string.import_error_copy_file_to_cache)
+                    // Show import dialog
+                    if (errorMessage != null) {
+                        CrashReportService.sendExceptionReport(RuntimeException("Error importing text file"), "IntentHandler.java", "text import failed")
+                        return ImportResult.fromErrorString(errorMessage)
+                    }
+
+                    val csvIntent = Intent(context, AnkiPagesWebview::class.java)
+                    csvIntent.putExtra("web_page", "import-csv")
+                    csvIntent.putExtra("csv_path", tempOutDir)
+                    val activity = context as AnkiActivity
+                    activity.startActivityForResultWithoutAnimation(csvIntent, PICK_TEXT_FILE)
+
+                    return ImportResult.fromSuccess()
                 } else {
                     // Copy to temporary file
                     filename = ensureValidLength(filename)
@@ -368,6 +388,14 @@ object ImportUtils {
 
             internal fun isDeckPackage(filename: String?): Boolean {
                 return filename != null && filename.lowercase(Locale.ROOT).endsWith(".apkg") && "collection.apkg" != filename
+            }
+
+            internal fun isTextFile(filename: String?): Boolean {
+                return filename != null && (
+                    filename.lowercase(Locale.ROOT).endsWith(".csv") ||
+                        filename.lowercase(Locale.ROOT).endsWith(".tsv") ||
+                        filename.lowercase(Locale.ROOT).endsWith(".txt")
+                    ) && "collection.apkg" != filename
             }
 
             fun hasExtension(filename: String, extension: String?): Boolean {

@@ -376,6 +376,12 @@
             android:label="@string/download_deck"
             android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
+        <activity
+            android:name="com.ichi2.anki.pages.AnkiPagesWebview"
+            android:configChanges="keyboardHidden|orientation|screenSize|locale"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
         <!-- Service to perform web API queries -->
         <service android:name="com.ichi2.widget.AnkiDroidWidgetSmall$UpdateService" />
 
