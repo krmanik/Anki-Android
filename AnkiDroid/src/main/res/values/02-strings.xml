@@ -419,4 +419,5 @@
 
     <!-- Manage note types -->
     <string name="field_editor_model_not_available">Failed to access collection. Please try again!</string>
+    <string name="test_string">Test String Again</string>
 </resources>
